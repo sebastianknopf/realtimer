@@ -1,3 +1,16 @@
 <resources>
     <string name="app_name">Realtimer</string>
+
+    <string name="str_save">Speichern</string>
+
+    <string name="config_gtfs_feed_url">GTFS-Feed URL</string>
+    <string name="config_mqtt_broker_host">MQTT-Host</string>
+    <string name="config_mqtt_broker_port">MQTT-Port</string>
+    <string name="config_mqtt_broker_username">MQTT-Benutzername</string>
+    <string name="config_mqtt_broker_password">MQTT-Passwort</string>
+    <string name="config_mqtt_topic_trip_updates">Topic Echtzeitdaten</string>
+    <string name="config_mqtt_topic_vehicle_positions">Topic Fahrzeugpositionen</string>
+    <string name="config_send_trip_updates">Echtzeitdaten senden</string>
+    <string name="config_send_vehicle_positions">Fahrzeugpositionen senden</string>
+    <string name="config_vehicle_id">Fahrzeug-ID</string>
 </resources>
