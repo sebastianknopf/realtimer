@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout>
 
+    <data>
+        
+        <variable
+            name="viewModel"
+            type="de.hka.realtimer.ConfigViewModel" />
+        
+    </data>
+    
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
@@ -28,7 +36,9 @@
                         android:id="@+id/txt_gtfs_feed_url"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/config_gtfs_feed_url" />
+                        android:hint="@string/config_gtfs_feed_url"
+                        android:text="@{viewModel.gtfsFeedUrl}"
+                        android:singleLine="true" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -41,7 +51,9 @@
                         android:id="@+id/txt_mqtt_broker_host"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/config_mqtt_broker_host" />
+                        android:hint="@string/config_mqtt_broker_host"
+                        android:text="@{viewModel.mqttHost}"
+                        android:singleLine="true"  />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -54,7 +66,9 @@
                         android:id="@+id/txt_mqtt_broker_port"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/config_mqtt_broker_port" />
+                        android:hint="@string/config_mqtt_broker_port"
+                        android:text="@{viewModel.mqttPort}"
+                        android:singleLine="true" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -67,7 +81,9 @@
                         android:id="@+id/txt_mqtt_broker_username"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/config_mqtt_broker_username" />
+                        android:hint="@string/config_mqtt_broker_username"
+                        android:text="@{viewModel.mqttUsername}"
+                        android:singleLine="true" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -81,7 +97,9 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="@string/config_mqtt_broker_password"
-                        android:inputType="textPassword" />
+                        android:inputType="textPassword"
+                        android:text="@{viewModel.mqttPassword}"
+                        android:singleLine="true" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -94,7 +112,9 @@
                         android:id="@+id/txt_mqtt_topic_trip_updates"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/config_mqtt_topic_trip_updates" />
+                        android:hint="@string/config_mqtt_topic_trip_updates"
+                        android:text="@{viewModel.mqttTopicTripUpdates}"
+                        android:singleLine="true" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -107,7 +127,9 @@
                         android:id="@+id/txt_mqtt_topic_vehicle_positions"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/config_mqtt_topic_vehicle_positions" />
+                        android:hint="@string/config_mqtt_topic_vehicle_positions"
+                        android:text="@{viewModel.mqttTopicVehiclePositions}"
+                        android:singleLine="true" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -118,7 +140,7 @@
                     android:layout_marginTop="24dp"
                     android:textAppearance="@style/TextAppearance.AppCompat.Medium"
                     android:text="@string/config_send_trip_updates"
-                    android:checked="true" />
+                    android:checked="@{viewModel.sendTripUpdates}" />
 
                 <com.google.android.material.switchmaterial.SwitchMaterial
                     android:id="@+id/sw_send_vehicle_positions"
@@ -126,7 +148,8 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                    android:text="@string/config_send_vehicle_positions" />
+                    android:text="@string/config_send_vehicle_positions"
+                    android:checked="@{viewModel.sendVehiclePositions}"/>
 
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/txt_vehicle_id_layout"
@@ -139,7 +162,9 @@
                         android:id="@+id/txt_vehicle_id"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="@string/config_vehicle_id" />
+                        android:hint="@string/config_vehicle_id"
+                        android:text="@{viewModel.vehicleId}"
+                        android:singleLine="true" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 

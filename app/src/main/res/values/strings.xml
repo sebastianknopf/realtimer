@@ -3,6 +3,12 @@
 
     <string name="str_save">Speichern</string>
 
+    <!-- Map Fragment -->
+    <string name="map_title">Realtimer</string>
+
+    <!-- Config Fragment -->
+    <string name="config_title">Einstellungen</string>
+    <string name="config_title_first_start">Ersteinrichtung</string>
     <string name="config_gtfs_feed_url">GTFS-Feed URL</string>
     <string name="config_mqtt_broker_host">MQTT-Host</string>
     <string name="config_mqtt_broker_port">MQTT-Port</string>
