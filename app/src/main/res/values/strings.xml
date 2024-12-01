@@ -2,9 +2,16 @@
     <string name="app_name">Realtimer</string>
 
     <string name="str_save">Speichern</string>
+    <string name="str_config">Einstellungen</string>
 
     <!-- Map Fragment -->
     <string name="map_title">Realtimer</string>
+
+    <!-- DataUpdateFragment -->
+    <string name="data_update_title">Datenupdate</string>
+    <string name="data_update_download">Datenupdate ...</string>
+    <string name="data_update_mqtt_test">Verbindungstest ...</string>
+    <string name="data_update_error">Fehler beim Datenupdate!</string>
 
     <!-- Config Fragment -->
     <string name="config_title">Einstellungen</string>

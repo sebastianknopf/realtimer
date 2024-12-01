@@ -1,4 +1,4 @@
-package de.hka.realtimer;
+package de.hka.realtimer.fragment;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
@@ -10,21 +10,22 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import de.hka.realtimer.common.Config;
+import androidx.navigation.NavController;
+import de.hka.realtimer.MainActivity;
+import de.hka.realtimer.viewmodel.ConfigViewModel;
+import de.hka.realtimer.R;
 import de.hka.realtimer.databinding.FragmentConfigBinding;
 
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 
 public class ConfigFragment extends Fragment {
 
     private FragmentConfigBinding dataBinding;
     private ConfigViewModel viewModel;
+    private NavController navigationController;
 
     private boolean firstStart;
 
@@ -33,6 +34,7 @@ public class ConfigFragment extends Fragment {
     }
 
     public ConfigFragment() {
+        super();
     }
 
     private ConfigFragment(boolean firstStart) {
@@ -45,22 +47,24 @@ public class ConfigFragment extends Fragment {
 
         AppCompatActivity activity = (AppCompatActivity) this.getActivity();
         if (this.firstStart) {
-            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
             activity.setTitle(R.string.config_title_first_start);
-
-            this.setHasOptionsMenu(false);
         } else {
-            activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
             activity.setTitle(R.string.config_title);
-
-            this.setHasOptionsMenu(true);
         }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        MainActivity mainActivity = (MainActivity) this.getActivity();
+        this.navigationController = mainActivity.getNavigationController();
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            this.getActivity().getSupportFragmentManager().popBackStack();
+            //this.navigateBack();
         }
 
         return super.onOptionsItemSelected(item);
@@ -69,6 +73,7 @@ public class ConfigFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         this.dataBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_config, container, false);
+        this.dataBinding.setLifecycleOwner(this.getViewLifecycleOwner());
 
         this.dataBinding.swSendVehiclePositions.setOnCheckedChangeListener((compoundButton, checked) -> {
             if (checked) {
@@ -92,13 +97,7 @@ public class ConfigFragment extends Fragment {
                     this.dataBinding.txtVehicleId.getText().toString()
             );
 
-            if (this.firstStart) {
-                FragmentTransaction transaction = this.getActivity().getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.main, new MapFragment());
-                transaction.commit();
-            } else {
-                this.getActivity().getSupportFragmentManager().popBackStack();
-            }
+            this.navigationController.navigate(R.id.action_configFragment_to_dataUpdateFragment);
         });
 
         return this.dataBinding.getRoot();

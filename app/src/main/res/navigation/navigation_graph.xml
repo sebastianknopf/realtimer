@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation_graph"
+    app:startDestination="@id/mapFragment">
+
+    <fragment
+        android:id="@+id/configFragment"
+        android:name="de.hka.realtimer.fragment.ConfigFragment"
+        android:label="ConfigFragment" >
+        <action
+            android:id="@+id/action_configFragment_to_mapFragment"
+            app:destination="@id/mapFragment"
+            app:popUpTo="@id/mapFragment"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_configFragment_to_dataUpdateFragment"
+            app:destination="@id/dataUpdateFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/navigation_graph"
+            app:popUpToInclusive="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/dataUpdateFragment"
+        android:name="de.hka.realtimer.fragment.DataUpdateFragment"
+        android:label="DataUpdateFragment" >
+        <action
+            android:id="@+id/action_dataUpdateFragment_to_mapFragment"
+            app:destination="@id/mapFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/navigation_graph"
+            app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_dataUpdateFragment_to_configFragment"
+            app:destination="@id/configFragment"
+            app:popUpTo="@id/configFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/mapFragment"
+        android:name="de.hka.realtimer.fragment.MapFragment"
+        android:label="fragment_map"
+        tools:layout="@layout/fragment_map" >
+        <action
+            android:id="@+id/action_mapFragment_to_dataUpdateFragment"
+            app:destination="@id/dataUpdateFragment" />
+        <action
+            android:id="@+id/action_mapFragment_to_configFragment"
+            app:destination="@id/configFragment" />
+        <action
+            android:id="@+id/action_mapFragment_to_configFragmentFirstStart"
+            app:destination="@id/configFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/navigation_graph"
+            app:popUpToInclusive="true" />
+    </fragment>
+</navigation>

@@ -1,14 +1,21 @@
-package de.hka.realtimer;
+package de.hka.realtimer.fragment;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import de.hka.realtimer.MainActivity;
+import de.hka.realtimer.common.Config;
+import de.hka.realtimer.viewmodel.MapViewModel;
+import de.hka.realtimer.R;
 
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -21,6 +28,8 @@ public class MapFragment extends Fragment {
 
     private MapViewModel viewModel;
 
+    private NavController navigationController;
+
     public static MapFragment newInstance() {
         return new MapFragment();
     }
@@ -29,8 +38,11 @@ public class MapFragment extends Fragment {
     }
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onStart() {
+        super.onStart();
+
+        MainActivity mainActivity = (MainActivity) this.getActivity();
+        this.navigationController = mainActivity.getNavigationController();
     }
 
     @Override
@@ -42,10 +54,7 @@ public class MapFragment extends Fragment {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         if (item.getItemId() == R.id.map_menu_config) {
-            FragmentTransaction transaction = this.getActivity().getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.main, ConfigFragment.newInstance(false));
-            transaction.addToBackStack(this.getClass().getName());
-            transaction.commit();
+            this.navigationController.navigate(R.id.action_mapFragment_to_configFragment);
         }
 
         return super.onOptionsItemSelected(item);
@@ -72,5 +81,16 @@ public class MapFragment extends Fragment {
         activity.setTitle(R.string.map_title);
 
         this.setHasOptionsMenu(true);
+
+        SharedPreferences sharedPreferences = this.getActivity().getSharedPreferences("de.hka.realtimer", Context.MODE_PRIVATE);
+
+        long currentUnixTimestamp = System.currentTimeMillis() / 1000L;
+        double lastUpdateHours = Math.floor((currentUnixTimestamp - (double) sharedPreferences.getLong(Config.LAST_DATA_UPDATE_TIMESTAMP, 0)) / 3600);
+
+        if (!sharedPreferences.getBoolean(Config.CONFIGURATION_DONE, false)) {
+            this.navigationController.navigate(R.id.action_mapFragment_to_configFragmentFirstStart);
+        } else if (lastUpdateHours >= 3) {
+            this.navigationController.navigate(R.id.action_mapFragment_to_dataUpdateFragment);
+        }
     }
 }

@@ -1,4 +1,4 @@
-package de.hka.realtimer;
+package de.hka.realtimer.viewmodel;
 
 import android.app.Application;
 import android.content.Context;

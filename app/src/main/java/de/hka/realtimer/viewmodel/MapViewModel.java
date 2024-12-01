@@ -1,10 +1,9 @@
-package de.hka.realtimer;
+package de.hka.realtimer.viewmodel;
 
 import android.app.Application;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.ViewModel;
 
 public class MapViewModel extends AndroidViewModel {
     public MapViewModel(@NonNull Application application) {

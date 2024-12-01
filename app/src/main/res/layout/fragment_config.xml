@@ -5,7 +5,7 @@
         
         <variable
             name="viewModel"
-            type="de.hka.realtimer.ConfigViewModel" />
+            type="de.hka.realtimer.viewmodel.ConfigViewModel" />
         
     </data>
     
@@ -18,9 +18,10 @@
         <ScrollView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_alignParentTop="true"
+            android:layout_alignParentBottom="true"
             android:layout_above="@id/btn_save_config"
-            tools:context=".ConfigFragment">
+            android:layout_marginBottom="32dp"
+            tools:context=".fragment.ConfigFragment">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -156,6 +157,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
+                    android:layout_marginBottom="32dp"
                     android:visibility="gone">
 
                     <com.google.android.material.textfield.TextInputEditText
