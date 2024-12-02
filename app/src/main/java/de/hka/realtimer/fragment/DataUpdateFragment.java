@@ -34,11 +34,18 @@ public class DataUpdateFragment extends Fragment {
     }
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onStart() {
+        super.onStart();
 
-        AppCompatActivity activity = (AppCompatActivity) this.getActivity();
-        activity.setTitle(R.string.data_update_title);
+        MainActivity mainActivity = (MainActivity) this.getActivity();
+        mainActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        mainActivity.setTitle(R.string.data_update_title);
+
+        this.navigationController = mainActivity.getNavigationController();
+
+        this.setHasOptionsMenu(false);
+
+        this.viewModel.runDataUpdate();
     }
 
     @Override
@@ -68,15 +75,5 @@ public class DataUpdateFragment extends Fragment {
                 this.dataBinding.txtDataUpdateInfo.setText(R.string.data_update_error);
             }
         });
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        MainActivity mainActivity = (MainActivity) this.getActivity();
-        this.navigationController = mainActivity.getNavigationController();
-
-        this.viewModel.runDataUpdate();
     }
 }

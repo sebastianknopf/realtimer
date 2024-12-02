@@ -42,7 +42,12 @@ public class MapFragment extends Fragment {
         super.onStart();
 
         MainActivity mainActivity = (MainActivity) this.getActivity();
+        mainActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        mainActivity.setTitle(R.string.map_title);
+
         this.navigationController = mainActivity.getNavigationController();
+
+        this.setHasOptionsMenu(true);
     }
 
     @Override
@@ -76,19 +81,16 @@ public class MapFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        AppCompatActivity activity = (AppCompatActivity) this.getActivity();
-        activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-        activity.setTitle(R.string.map_title);
-
-        this.setHasOptionsMenu(true);
-
         SharedPreferences sharedPreferences = this.getActivity().getSharedPreferences("de.hka.realtimer", Context.MODE_PRIVATE);
 
         long currentUnixTimestamp = System.currentTimeMillis() / 1000L;
         double lastUpdateHours = Math.floor((currentUnixTimestamp - (double) sharedPreferences.getLong(Config.LAST_DATA_UPDATE_TIMESTAMP, 0)) / 3600);
 
         if (!sharedPreferences.getBoolean(Config.CONFIGURATION_DONE, false)) {
-            this.navigationController.navigate(R.id.action_mapFragment_to_configFragmentFirstStart);
+            Bundle bundle = new Bundle();
+            bundle.putBoolean(ConfigFragment.ARG_FIRST_START, true);
+
+            this.navigationController.navigate(R.id.action_mapFragment_to_configFragmentFirstStart, bundle);
         } else if (lastUpdateHours >= 3) {
             this.navigationController.navigate(R.id.action_mapFragment_to_dataUpdateFragment);
         }

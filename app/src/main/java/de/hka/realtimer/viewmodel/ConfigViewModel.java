@@ -65,8 +65,8 @@ public class ConfigViewModel extends AndroidViewModel {
         this.mqttPort.setValue(sharedPreferences.getString(Config.MQTT_PORT, "1883"));
         this.mqttUsername.setValue(sharedPreferences.getString(Config.MQTT_USERNAME, ""));
         this.mqttPassword.setValue(sharedPreferences.getString(Config.MQTT_PASSWORD, ""));
-        this.mqttTopicTripUpdates.setValue(sharedPreferences.getString(Config.MQTT_TOPIC_TRIP_UPDATES, "realtime/hka/tripupdates[routeId]/[tripId]"));
-        this.mqttTopicVehiclePositions.setValue(sharedPreferences.getString(Config.MQTT_TOPIC_VEHICLE_POSITIONS, "realtime/hka/vehiclepositions/[vehicleId]"));
+        this.mqttTopicTripUpdates.setValue(sharedPreferences.getString(Config.MQTT_TOPIC_TRIP_UPDATES, "realtime/hka/gtfsrt/tripupdates"));
+        this.mqttTopicVehiclePositions.setValue(sharedPreferences.getString(Config.MQTT_TOPIC_VEHICLE_POSITIONS, "realtime/hka/gtfsrtvehiclepositions"));
         this.sendTripUpdates.setValue(sharedPreferences.getBoolean(Config.SEND_TRIP_UPDATES, true));
         this.sendVehiclePositions.setValue(sharedPreferences.getBoolean(Config.SEND_VEHICLE_POSITIONS, false));
         this.vehicleId.setValue(sharedPreferences.getString(Config.VEHICLE_ID, "Vehicle-1"));

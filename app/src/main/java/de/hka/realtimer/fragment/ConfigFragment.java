@@ -23,6 +23,8 @@ import android.view.ViewGroup;
 
 public class ConfigFragment extends Fragment {
 
+    public final static String ARG_FIRST_START = "ARG_FIRST_START";
+
     private FragmentConfigBinding dataBinding;
     private ConfigViewModel viewModel;
     private NavController navigationController;
@@ -45,12 +47,20 @@ public class ConfigFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        AppCompatActivity activity = (AppCompatActivity) this.getActivity();
-        if (this.firstStart) {
-            activity.setTitle(R.string.config_title_first_start);
-        } else {
-            activity.setTitle(R.string.config_title);
+        Bundle args = this.getArguments();
+        if (args != null) {
+            this.firstStart = args.getBoolean(ARG_FIRST_START, false);
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == android.R.id.home) {
+            this.navigationController.navigate(R.id.action_configFragment_to_mapFragment);
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
@@ -58,16 +68,17 @@ public class ConfigFragment extends Fragment {
         super.onStart();
 
         MainActivity mainActivity = (MainActivity) this.getActivity();
-        this.navigationController = mainActivity.getNavigationController();
-    }
+        mainActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(!this.firstStart);
 
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            //this.navigateBack();
+        if (this.firstStart) {
+            mainActivity.setTitle(R.string.config_title_first_start);
+        } else {
+            mainActivity.setTitle(R.string.config_title);
         }
 
-        return super.onOptionsItemSelected(item);
+        this.navigationController = mainActivity.getNavigationController();
+
+        this.setHasOptionsMenu(!this.firstStart);
     }
 
     @Override
