@@ -1,5 +1,6 @@
 [versions]
 agp = "8.7.2"
+mapLibreSdk = "10.0.2"
 junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.5.1"
@@ -13,6 +14,7 @@ lifecycleViewmodelKtx = "2.6.1"
 navigationFragmentKtx = "2.8.4"
 
 [libraries]
+maplibre-sdk = { module = "org.maplibre.gl:android-sdk", version.ref = "mapLibreSdk" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }

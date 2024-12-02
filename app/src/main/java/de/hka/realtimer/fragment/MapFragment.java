@@ -1,6 +1,7 @@
 package de.hka.realtimer.fragment;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -14,6 +15,7 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import de.hka.realtimer.MainActivity;
 import de.hka.realtimer.common.Config;
+import de.hka.realtimer.databinding.FragmentMapBinding;
 import de.hka.realtimer.viewmodel.MapViewModel;
 import de.hka.realtimer.R;
 
@@ -24,17 +26,32 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.mapbox.mapboxsdk.Mapbox;
+import com.mapbox.mapboxsdk.maps.MapboxMap;
+import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
+import com.mapbox.mapboxsdk.maps.Style;
+
 public class MapFragment extends Fragment {
 
+    private FragmentMapBinding dataBinding;
     private MapViewModel viewModel;
 
     private NavController navigationController;
+
+    private MapboxMap map;
 
     public static MapFragment newInstance() {
         return new MapFragment();
     }
 
     public MapFragment() {
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        Mapbox.getInstance(this.getContext());
     }
 
     @Override
@@ -48,6 +65,8 @@ public class MapFragment extends Fragment {
         this.navigationController = mainActivity.getNavigationController();
 
         this.setHasOptionsMenu(true);
+
+
     }
 
     @Override
@@ -67,7 +86,14 @@ public class MapFragment extends Fragment {
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.fragment_map, container, false);
+        this.dataBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_map, container, false);
+        this.dataBinding.setLifecycleOwner(this.getViewLifecycleOwner());
+
+        this.dataBinding.mapView.getMapAsync(mapboxMap -> {
+
+        });
+
+        return this.dataBinding.getRoot();
     }
 
     @Override
