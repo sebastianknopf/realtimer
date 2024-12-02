@@ -5,6 +5,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,6 +41,9 @@ public class DataUpdateViewModel extends AndroidViewModel {
             try {
                 this.dataUpdateMessage.postValue(this.getApplication().getString(R.string.data_update_download));
                 this.downloadGtfsFeed();
+
+                this.dataUpdateMessage.postValue(this.getApplication().getString(R.string.data_update_integration));
+                this.integrateGtfsFeed();
 
                 this.dataUpdateMessage.postValue(this.getApplication().getString(R.string.data_update_mqtt_test));
                 this.verifyMqttConnection();
@@ -128,9 +132,27 @@ public class DataUpdateViewModel extends AndroidViewModel {
         }
     }
 
+    public void integrateGtfsFeed() throws IOException {
+        File gtfsInputFile = new File(this.getApplication().getFilesDir() + "/gtfs.zip");
+
+        /*GtfsReader reader = new GtfsReader();
+        reader.setInputLocation(gtfsInputFile);
+
+        GtfsDaoImpl dao = new GtfsDaoImpl();
+        reader.setEntityStore(dao);
+
+        reader.run();*/
+
+        try {
+            Thread.sleep(2500);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public void verifyMqttConnection() {
         try {
-            Thread.sleep(5000);
+            Thread.sleep(2500);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

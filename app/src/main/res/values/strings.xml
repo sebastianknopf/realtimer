@@ -10,6 +10,7 @@
     <!-- DataUpdateFragment -->
     <string name="data_update_title">Datenupdate</string>
     <string name="data_update_download">Datenupdate ...</string>
+    <string name="data_update_integration">Integration ...</string>
     <string name="data_update_mqtt_test">Verbindungstest ...</string>
     <string name="data_update_error">Fehler beim Datenupdate!</string>
 
