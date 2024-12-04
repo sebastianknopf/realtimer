@@ -72,6 +72,7 @@ public class DataUpdateFragment extends Fragment {
                 this.navigationController.navigate(R.id.action_dataUpdateFragment_to_mapFragment);
             } else if (dataUpdateStatus == DataUpdateStatus.ERROR) {
                 this.dataBinding.btnConfig.setVisibility(View.VISIBLE);
+                this.dataBinding.pgbUpdateProgress.setVisibility(View.INVISIBLE);
                 this.dataBinding.txtDataUpdateInfo.setText(R.string.data_update_error);
             }
         });

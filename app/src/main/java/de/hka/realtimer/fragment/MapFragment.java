@@ -5,6 +5,7 @@ import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.app.DownloadManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -19,6 +20,8 @@ import de.hka.realtimer.databinding.FragmentMapBinding;
 import de.hka.realtimer.viewmodel.MapViewModel;
 import de.hka.realtimer.R;
 
+import android.util.Base64;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -26,10 +29,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.mapbox.mapboxsdk.Mapbox;
-import com.mapbox.mapboxsdk.maps.MapboxMap;
-import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
-import com.mapbox.mapboxsdk.maps.Style;
+import org.osmdroid.api.IMapController;
+import org.osmdroid.config.Configuration;
+import org.osmdroid.tileprovider.tilesource.XYTileSource;
+import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.MapController;
+
+import java.nio.charset.StandardCharsets;
 
 public class MapFragment extends Fragment {
 
@@ -37,8 +43,6 @@ public class MapFragment extends Fragment {
     private MapViewModel viewModel;
 
     private NavController navigationController;
-
-    private MapboxMap map;
 
     public static MapFragment newInstance() {
         return new MapFragment();
@@ -50,8 +54,6 @@ public class MapFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        Mapbox.getInstance(this.getContext());
     }
 
     @Override
@@ -66,7 +68,20 @@ public class MapFragment extends Fragment {
 
         this.setHasOptionsMenu(true);
 
+        // check whether configuration has already been done and data are updated properly
+        SharedPreferences sharedPreferences = this.getActivity().getSharedPreferences("de.hka.realtimer", Context.MODE_PRIVATE);
 
+        long currentUnixTimestamp = System.currentTimeMillis() / 1000L;
+        double lastUpdateHours = Math.floor((currentUnixTimestamp - (double) sharedPreferences.getLong(Config.LAST_DATA_UPDATE_TIMESTAMP, 0)) / 3600);
+
+        if (!sharedPreferences.getBoolean(Config.CONFIGURATION_DONE, false)) {
+            Bundle bundle = new Bundle();
+            bundle.putBoolean(ConfigFragment.ARG_FIRST_START, true);
+
+            this.navigationController.navigate(R.id.action_mapFragment_to_configFragmentFirstStart, bundle);
+        } else if (lastUpdateHours >= 3) {
+            this.navigationController.navigate(R.id.action_mapFragment_to_dataUpdateFragment);
+        }
     }
 
     @Override
@@ -89,9 +104,32 @@ public class MapFragment extends Fragment {
         this.dataBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_map, container, false);
         this.dataBinding.setLifecycleOwner(this.getViewLifecycleOwner());
 
-        this.dataBinding.mapView.getMapAsync(mapboxMap -> {
+        // configure map view
+        XYTileSource mapServer = new XYTileSource("MapServer",
+                8,
+                20,
+                256,
+                ".png",
+                new String[]{"https://tileserver.svprod01.app/styles/default/"}
+        );
 
-        });
+        String authorizationString = this.getMapServerAuthorizationString(
+                "ws2223@hka",
+                "LeevwBfDi#2027"
+        );
+
+        Configuration
+                .getInstance()
+                .getAdditionalHttpRequestProperties()
+                .put("Authorization", authorizationString);
+
+        this.dataBinding.mapView.setTileSource(mapServer);
+        this.dataBinding.mapView.setMultiTouchControls(true);
+        this.dataBinding.mapView.setBuiltInZoomControls(false);
+
+        IMapController mapController = this.dataBinding.mapView.getController();
+        mapController.setZoom(15.0);
+        mapController.setCenter(new GeoPoint(48.883000, 8.700000));
 
         return this.dataBinding.getRoot();
     }
@@ -103,22 +141,9 @@ public class MapFragment extends Fragment {
         this.viewModel = new ViewModelProvider(this).get(MapViewModel.class);
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        SharedPreferences sharedPreferences = this.getActivity().getSharedPreferences("de.hka.realtimer", Context.MODE_PRIVATE);
-
-        long currentUnixTimestamp = System.currentTimeMillis() / 1000L;
-        double lastUpdateHours = Math.floor((currentUnixTimestamp - (double) sharedPreferences.getLong(Config.LAST_DATA_UPDATE_TIMESTAMP, 0)) / 3600);
-
-        if (!sharedPreferences.getBoolean(Config.CONFIGURATION_DONE, false)) {
-            Bundle bundle = new Bundle();
-            bundle.putBoolean(ConfigFragment.ARG_FIRST_START, true);
-
-            this.navigationController.navigate(R.id.action_mapFragment_to_configFragmentFirstStart, bundle);
-        } else if (lastUpdateHours >= 3) {
-            this.navigationController.navigate(R.id.action_mapFragment_to_dataUpdateFragment);
-        }
+    private String getMapServerAuthorizationString(String username, String password)
+    {
+        String authorizationString = String.format("%s:%s", username, password);
+        return "Basic " + Base64.encodeToString(authorizationString.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
     }
 }

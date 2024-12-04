@@ -4,6 +4,10 @@ import android.accounts.NetworkErrorException;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
+
+import org.gtfs.reader.GtfsReader;
+import org.gtfs.reader.GtfsSimpleDao;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -142,6 +146,16 @@ public class DataUpdateViewModel extends AndroidViewModel {
         reader.setEntityStore(dao);
 
         reader.run();*/
+
+        GtfsSimpleDao gtfsSimpleDao = new GtfsSimpleDao();
+
+        GtfsReader gtfsReader = new GtfsReader();
+        gtfsReader.setDataAccessObject(gtfsSimpleDao);
+        gtfsReader.read(gtfsInputFile.getAbsolutePath());
+
+        gtfsSimpleDao.getAgencies().forEach(agency -> {
+            Log.d("DataUpdateViewModel", agency.getName());
+        });
 
         try {
             Thread.sleep(2500);
