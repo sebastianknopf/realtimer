@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -11,6 +13,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import de.hka.realtimer.MainActivity;
+import de.hka.realtimer.common.Config;
 import de.hka.realtimer.common.DataUpdateStatus;
 import de.hka.realtimer.databinding.FragmentDataUpdateBinding;
 import de.hka.realtimer.viewmodel.DataUpdateViewModel;
@@ -45,7 +48,17 @@ public class DataUpdateFragment extends Fragment {
 
         this.setHasOptionsMenu(false);
 
-        this.viewModel.runDataUpdate();
+        // check whether configuration has already been done and data are updated properly
+        SharedPreferences sharedPreferences = this.getActivity().getSharedPreferences("de.hka.realtimer", Context.MODE_PRIVATE);
+
+        if (!sharedPreferences.getBoolean(Config.CONFIGURATION_DONE, false)) {
+            Bundle bundle = new Bundle();
+            bundle.putBoolean(ConfigFragment.ARG_FIRST_START, true);
+
+            this.navigationController.navigate(R.id.action_dataUpdateFragment_to_configFragmentFirstStart, bundle);
+        } else {
+            this.viewModel.runDataUpdate();
+        }
     }
 
     @Override

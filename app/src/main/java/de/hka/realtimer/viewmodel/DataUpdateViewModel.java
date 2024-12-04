@@ -106,10 +106,6 @@ public class DataUpdateViewModel extends AndroidViewModel {
 
                     output.write(data, 0, count);
                 }
-
-                SharedPreferences.Editor sharedPreferencesEditor = sharedPreferences.edit();
-                sharedPreferencesEditor.putLong(Config.LAST_DATA_UPDATE_TIMESTAMP, System.currentTimeMillis() / 1000L);
-                sharedPreferencesEditor.apply();
             } catch (Exception e) {
                 exception = e;
             } finally {
@@ -138,14 +134,6 @@ public class DataUpdateViewModel extends AndroidViewModel {
 
     public void integrateGtfsFeed() throws IOException {
         File gtfsInputFile = new File(this.getApplication().getFilesDir() + "/gtfs.zip");
-
-        /*GtfsReader reader = new GtfsReader();
-        reader.setInputLocation(gtfsInputFile);
-
-        GtfsDaoImpl dao = new GtfsDaoImpl();
-        reader.setEntityStore(dao);
-
-        reader.run();*/
 
         GtfsSimpleDao gtfsSimpleDao = new GtfsSimpleDao();
 

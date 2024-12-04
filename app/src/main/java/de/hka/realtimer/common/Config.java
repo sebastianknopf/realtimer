@@ -3,7 +3,6 @@ package de.hka.realtimer.common;
 public class Config {
 
     public final static String CONFIGURATION_DONE = "CONFIGURATION_DONE";
-    public final static String LAST_DATA_UPDATE_TIMESTAMP = "LAST_DATA_UPDATE_TIMESTAMP";
     public final static String GTFS_FEED_URL = "GTFS_FEED_URL";
     public final static String MQTT_HOST = "MQTT_HOST";
     public final static String MQTT_PORT = "MQTT_PORT";

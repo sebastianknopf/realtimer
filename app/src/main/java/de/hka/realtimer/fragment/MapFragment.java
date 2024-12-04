@@ -67,21 +67,6 @@ public class MapFragment extends Fragment {
         this.navigationController = mainActivity.getNavigationController();
 
         this.setHasOptionsMenu(true);
-
-        // check whether configuration has already been done and data are updated properly
-        SharedPreferences sharedPreferences = this.getActivity().getSharedPreferences("de.hka.realtimer", Context.MODE_PRIVATE);
-
-        long currentUnixTimestamp = System.currentTimeMillis() / 1000L;
-        double lastUpdateHours = Math.floor((currentUnixTimestamp - (double) sharedPreferences.getLong(Config.LAST_DATA_UPDATE_TIMESTAMP, 0)) / 3600);
-
-        if (!sharedPreferences.getBoolean(Config.CONFIGURATION_DONE, false)) {
-            Bundle bundle = new Bundle();
-            bundle.putBoolean(ConfigFragment.ARG_FIRST_START, true);
-
-            this.navigationController.navigate(R.id.action_mapFragment_to_configFragmentFirstStart, bundle);
-        } else if (lastUpdateHours >= 3) {
-            this.navigationController.navigate(R.id.action_mapFragment_to_dataUpdateFragment);
-        }
     }
 
     @Override

@@ -12,6 +12,7 @@ import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import de.hka.realtimer.common.Config;
 import de.hka.realtimer.databinding.ActivityMainBinding;
+import de.hka.realtimer.fragment.ConfigFragment;
 
 public class MainActivity extends AppCompatActivity {
 
