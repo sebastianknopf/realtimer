@@ -45,7 +45,7 @@ dependencies {
     implementation libs.navigation.fragment.ktx
     implementation libs.navigation.ui.ktx
 
-    implementation libs.osmdroid.android
+    implementation libs.maplibre.android
 
     implementation files('libs\\org.gtfs.reader.jar')
 

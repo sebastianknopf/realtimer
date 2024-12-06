@@ -29,11 +29,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import org.osmdroid.api.IMapController;
-import org.osmdroid.config.Configuration;
-import org.osmdroid.tileprovider.tilesource.XYTileSource;
-import org.osmdroid.util.GeoPoint;
-import org.osmdroid.views.MapController;
+import org.maplibre.android.MapLibre;
+import org.maplibre.android.camera.CameraPosition;
+import org.maplibre.android.geometry.LatLng;
 
 import java.nio.charset.StandardCharsets;
 
@@ -54,19 +52,8 @@ public class MapFragment extends Fragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-    }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        MainActivity mainActivity = (MainActivity) this.getActivity();
-        mainActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-        mainActivity.setTitle(R.string.map_title);
-
-        this.navigationController = mainActivity.getNavigationController();
-
-        this.setHasOptionsMenu(true);
+        MapLibre.getInstance(this.requireContext());
     }
 
     @Override
@@ -90,31 +77,13 @@ public class MapFragment extends Fragment {
         this.dataBinding.setLifecycleOwner(this.getViewLifecycleOwner());
 
         // configure map view
-        XYTileSource mapServer = new XYTileSource("MapServer",
-                8,
-                20,
-                256,
-                ".png",
-                new String[]{"https://tileserver.svprod01.app/styles/default/"}
-        );
+        this.dataBinding.mapView.getMapAsync(map -> {
+            map.getUiSettings().setLogoEnabled(false);
+            map.getUiSettings().setAttributionEnabled(false);
 
-        String authorizationString = this.getMapServerAuthorizationString(
-                "ws2223@hka",
-                "LeevwBfDi#2027"
-        );
-
-        Configuration
-                .getInstance()
-                .getAdditionalHttpRequestProperties()
-                .put("Authorization", authorizationString);
-
-        this.dataBinding.mapView.setTileSource(mapServer);
-        this.dataBinding.mapView.setMultiTouchControls(true);
-        this.dataBinding.mapView.setBuiltInZoomControls(false);
-
-        IMapController mapController = this.dataBinding.mapView.getController();
-        mapController.setZoom(15.0);
-        mapController.setCenter(new GeoPoint(48.883000, 8.700000));
+            map.setStyle("https://sgx.geodatenzentrum.de/gdz_basemapde_vektor/styles/bm_web_col.json");
+            map.setCameraPosition(new CameraPosition.Builder().target(new LatLng(48.8922, 8.6946)).zoom(14.0).build());
+        });
 
         return this.dataBinding.getRoot();
     }
@@ -126,9 +95,46 @@ public class MapFragment extends Fragment {
         this.viewModel = new ViewModelProvider(this).get(MapViewModel.class);
     }
 
-    private String getMapServerAuthorizationString(String username, String password)
-    {
-        String authorizationString = String.format("%s:%s", username, password);
-        return "Basic " + Base64.encodeToString(authorizationString.getBytes(StandardCharsets.UTF_8), Base64.DEFAULT);
+    @Override
+    public void onStart() {
+        super.onStart();
+
+        MainActivity mainActivity = (MainActivity) this.getActivity();
+        mainActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        mainActivity.setTitle(R.string.map_title);
+
+        this.navigationController = mainActivity.getNavigationController();
+
+        this.setHasOptionsMenu(true);
+
+        this.dataBinding.mapView.onStart();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        this.dataBinding.mapView.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+
+        this.dataBinding.mapView.onPause();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        this.dataBinding.mapView.onStop();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        this.dataBinding.mapView.onDestroy();
     }
 }
