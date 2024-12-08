@@ -28,4 +28,9 @@ public class DepartureWithStopAndTrip {
    public void setTrip(TripWithRoute trip) {
       this.trip = trip;
    }
+
+   public String getDepartureTimeDisplayString() {
+      String departureTimeDisplayString = this.getStopTime().getDepartureTime();
+      return departureTimeDisplayString.substring(0, 5);
+   }
 }

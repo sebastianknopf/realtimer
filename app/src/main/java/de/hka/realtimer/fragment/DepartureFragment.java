@@ -12,6 +12,8 @@ import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import de.hka.realtimer.MainActivity;
 import de.hka.realtimer.R;
+import de.hka.realtimer.adpater.DepartureListAdapter;
+import de.hka.realtimer.adpater.OnItemClickListener;
 import de.hka.realtimer.databinding.FragmentDepartureBinding;
 import de.hka.realtimer.model.DepartureWithStopAndTrip;
 import de.hka.realtimer.viewmodel.DepartureViewModel;
@@ -35,9 +37,14 @@ public class DepartureFragment extends Fragment {
 
     private String stationId;
     private String stationName;
+    private final DepartureListAdapter departureListAdapter;
 
     public static DepartureFragment newInstance() {
         return new DepartureFragment();
+    }
+
+    public DepartureFragment() {
+        this.departureListAdapter = new DepartureListAdapter();
     }
 
     @Override
@@ -79,10 +86,14 @@ public class DepartureFragment extends Fragment {
         this.viewModel = new ViewModelProvider(this).get(DepartureViewModel.class);
         this.dataBinding.setViewModel(this.viewModel);
 
+        this.dataBinding.lstDepartures.setAdapter(this.departureListAdapter);
+
+        this.departureListAdapter.setOnItemClickListener(item -> {
+            Log.d(this.getClass().getSimpleName(), item.getTrip().getTripId());
+        });
+
         this.viewModel.getDepartures().observe(this.getViewLifecycleOwner(), departureWithStopAndTrips -> {
-            for (DepartureWithStopAndTrip departure : departureWithStopAndTrips) {
-                Log.d(this.getClass().getSimpleName(), departure.getStopTime().getDepartureTime() +  ": " + departure.getTrip().getHeadsign());
-            }
+            this.viewModel.getDepartures().observe(this.getViewLifecycleOwner(), this.departureListAdapter::setDepartureList);
         });
 
         this.viewModel.loadDeparturesForStation(this.stationId);
