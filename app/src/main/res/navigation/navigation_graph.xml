@@ -67,5 +67,21 @@
             app:destination="@id/mapFragment"
             app:popUpTo="@id/mapFragment"
             app:popUpToInclusive="true" />
+        <action
+            android:id="@+id/action_departureFragment_to_tripFragment"
+            app:destination="@id/tripFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/navigation_graph"
+            app:popUpToInclusive="true" />
+    </fragment>
+    <fragment
+        android:id="@+id/tripFragment"
+        android:name="de.hka.realtimer.fragment.TripFragment"
+        android:label="TripFragment" >
+        <action
+            android:id="@+id/action_tripFragment_to_mapFragment"
+            app:destination="@id/mapFragment"
+            app:popUpTo="@id/mapFragment"
+            app:popUpToInclusive="true" />
     </fragment>
 </navigation>

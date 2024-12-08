@@ -89,7 +89,10 @@ public class DepartureFragment extends Fragment {
         this.dataBinding.lstDepartures.setAdapter(this.departureListAdapter);
 
         this.departureListAdapter.setOnItemClickListener(item -> {
-            Log.d(this.getClass().getSimpleName(), item.getTrip().getTripId());
+            Bundle bundle = new Bundle();
+            bundle.putString(TripFragment.ARG_TRIP_ID, item.getTrip().getTripId());
+
+            this.navigationController.navigate(R.id.action_departureFragment_to_tripFragment, bundle);
         });
 
         this.viewModel.getDepartures().observe(this.getViewLifecycleOwner(), departureWithStopAndTrips -> {

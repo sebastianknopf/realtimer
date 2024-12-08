@@ -27,4 +27,7 @@
     <string name="config_send_trip_updates">Echtzeitdaten senden</string>
     <string name="config_send_vehicle_positions">Fahrzeugpositionen senden</string>
     <string name="config_vehicle_id">Fahrzeug-ID</string>
+
+    <!-- TripFragment -->
+    <string name="trip_title">Aktuelle Fahrt</string>
 </resources>
