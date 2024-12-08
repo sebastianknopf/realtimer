@@ -24,6 +24,8 @@ import androidx.lifecycle.MutableLiveData;
 import de.hka.realtimer.R;
 import de.hka.realtimer.common.Config;
 import de.hka.realtimer.common.DataUpdateStatus;
+import de.hka.realtimer.data.GtfsRelationalDao;
+import de.hka.realtimer.data.GtfsRepository;
 
 public class DataUpdateViewModel extends AndroidViewModel {
 
@@ -41,7 +43,6 @@ public class DataUpdateViewModel extends AndroidViewModel {
 
     public void runDataUpdate() {
         Runnable runnable = () -> {
-
             try {
                 this.dataUpdateMessage.postValue(this.getApplication().getString(R.string.data_update_download));
                 this.downloadGtfsFeed();
@@ -135,21 +136,8 @@ public class DataUpdateViewModel extends AndroidViewModel {
     public void integrateGtfsFeed() throws IOException {
         File gtfsInputFile = new File(this.getApplication().getFilesDir() + "/gtfs.zip");
 
-        GtfsSimpleDao gtfsSimpleDao = new GtfsSimpleDao();
-
-        GtfsReader gtfsReader = new GtfsReader();
-        gtfsReader.setDataAccessObject(gtfsSimpleDao);
-        gtfsReader.read(gtfsInputFile.getAbsolutePath());
-
-        gtfsSimpleDao.getAgencies().forEach(agency -> {
-            Log.d("DataUpdateViewModel", agency.getName());
-        });
-
-        try {
-            Thread.sleep(2500);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+        GtfsRepository repository = GtfsRepository.getInstance();
+        repository.readInputFeed(gtfsInputFile.getAbsolutePath());
     }
 
     public void verifyMqttConnection() {

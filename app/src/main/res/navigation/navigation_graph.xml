@@ -54,5 +54,18 @@
         <action
             android:id="@+id/action_mapFragment_to_configFragment"
             app:destination="@id/configFragment" />
+        <action
+            android:id="@+id/action_mapFragment_to_departureFragment"
+            app:destination="@id/departureFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/departureFragment"
+        android:name="de.hka.realtimer.fragment.DepartureFragment"
+        android:label="DepartureFragment" >
+        <action
+            android:id="@+id/action_departureFragment_to_mapFragment"
+            app:destination="@id/mapFragment"
+            app:popUpTo="@id/mapFragment"
+            app:popUpToInclusive="true" />
     </fragment>
 </navigation>

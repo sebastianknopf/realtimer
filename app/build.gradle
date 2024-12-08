@@ -46,6 +46,7 @@ dependencies {
     implementation libs.navigation.ui.ktx
 
     implementation libs.maplibre.android
+    implementation libs.maplibre.plugin.annotation.v9
 
     implementation files('libs\\org.gtfs.reader.jar')
 
