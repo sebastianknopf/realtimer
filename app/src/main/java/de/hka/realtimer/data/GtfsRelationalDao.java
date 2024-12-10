@@ -22,6 +22,7 @@ import java.util.Map;
 
 import de.hka.realtimer.model.DepartureWithStopAndTrip;
 import de.hka.realtimer.model.TripWithRoute;
+import de.hka.realtimer.model.TripWithStopTimesAndRoute;
 
 public class GtfsRelationalDao extends GtfsSimpleDao {
 
@@ -118,6 +119,16 @@ public class GtfsRelationalDao extends GtfsSimpleDao {
         stationDepartureList.sort(Comparator.comparing(a -> a.getStopTime().getDepartureTime()));
 
         return stationDepartureList;
+    }
+
+    public TripWithStopTimesAndRoute getTripDetails(String tripId) {
+        for (Trip trip : this.getTrips()) {
+            if (trip.getTripId().equals(tripId)) {
+                return new TripWithStopTimesAndRoute(trip, this);
+            }
+        }
+
+        return null;
     }
 
 }

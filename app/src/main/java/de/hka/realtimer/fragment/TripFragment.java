@@ -10,12 +10,11 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import de.hka.realtimer.MainActivity;
 import de.hka.realtimer.R;
-import de.hka.realtimer.adpater.DepartureListAdapter;
-import de.hka.realtimer.databinding.FragmentDepartureBinding;
 import de.hka.realtimer.databinding.FragmentTripBinding;
-import de.hka.realtimer.viewmodel.DepartureViewModel;
+import de.hka.realtimer.model.StopTimeWithStop;
 import de.hka.realtimer.viewmodel.TripViewModel;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -71,6 +70,12 @@ public class TripFragment extends Fragment {
 
         this.viewModel = new ViewModelProvider(this).get(TripViewModel.class);
         this.dataBinding.setViewModel(this.viewModel);
+
+        this.viewModel.getTripDetails().observe(this.getViewLifecycleOwner(), trip -> {
+            for (StopTimeWithStop stopTime : trip.getStopTimes()) {
+                Log.d(this.getClass().getSimpleName(), stopTime.getStop().getName());
+            }
+        });
 
         this.viewModel.loadTripDetails(this.tripId);
     }
