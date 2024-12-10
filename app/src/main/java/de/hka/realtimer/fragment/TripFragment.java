@@ -10,8 +10,8 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import de.hka.realtimer.MainActivity;
 import de.hka.realtimer.R;
+import de.hka.realtimer.adpater.StopTimeListAdapter;
 import de.hka.realtimer.databinding.FragmentTripBinding;
-import de.hka.realtimer.model.StopTimeWithStop;
 import de.hka.realtimer.viewmodel.TripViewModel;
 
 import android.util.Log;
@@ -28,9 +28,14 @@ public class TripFragment extends Fragment {
     private NavController navigationController;
 
     private String tripId;
+    private final StopTimeListAdapter departureListAdapter;
 
     public static TripFragment newInstance() {
         return new TripFragment();
+    }
+
+    public TripFragment() {
+        this.departureListAdapter = new StopTimeListAdapter();
     }
 
     @Override
@@ -71,10 +76,19 @@ public class TripFragment extends Fragment {
         this.viewModel = new ViewModelProvider(this).get(TripViewModel.class);
         this.dataBinding.setViewModel(this.viewModel);
 
+        this.dataBinding.lstStopTimes.setAdapter(this.departureListAdapter);
+
+        this.departureListAdapter.setOnItemSelectListener(item -> {
+            Log.d(this.getClass().getSimpleName(), item.getStop().getId());
+        });
+
+        this.dataBinding.btnLeaveTrip.setOnClickListener(btn -> {
+            this.navigationController.navigate(R.id.action_tripFragment_to_mapFragment);
+        });
+
         this.viewModel.getTripDetails().observe(this.getViewLifecycleOwner(), trip -> {
-            for (StopTimeWithStop stopTime : trip.getStopTimes()) {
-                Log.d(this.getClass().getSimpleName(), stopTime.getStop().getName());
-            }
+            this.departureListAdapter.setStopTimeList(trip.getStopTimes());
+            this.dataBinding.viewTripDetails.setVisibility(View.VISIBLE);
         });
 
         this.viewModel.loadTripDetails(this.tripId);

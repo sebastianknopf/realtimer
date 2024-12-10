@@ -47,4 +47,9 @@ public class StopTimeWithStop extends StopTime {
     public void setStop(Stop stop) {
         this.stop = stop;
     }
+
+    public String getDepartureTimeDisplayString() {
+        String departureTimeDisplayString = this.getDepartureTime();
+        return departureTimeDisplayString.substring(0, 5);
+    }
 }

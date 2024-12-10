@@ -30,4 +30,5 @@
 
     <!-- TripFragment -->
     <string name="trip_title">Aktuelle Fahrt</string>
+    <string name="trip_leave_trip">Fahrt beenden</string>
 </resources>

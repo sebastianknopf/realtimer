@@ -81,7 +81,8 @@
         <action
             android:id="@+id/action_tripFragment_to_mapFragment"
             app:destination="@id/mapFragment"
-            app:popUpTo="@id/mapFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/navigation_graph"
             app:popUpToInclusive="true" />
     </fragment>
 </navigation>

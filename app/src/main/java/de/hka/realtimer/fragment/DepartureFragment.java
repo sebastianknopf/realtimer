@@ -95,9 +95,7 @@ public class DepartureFragment extends Fragment {
             this.navigationController.navigate(R.id.action_departureFragment_to_tripFragment, bundle);
         });
 
-        this.viewModel.getDepartures().observe(this.getViewLifecycleOwner(), departureWithStopAndTrips -> {
-            this.viewModel.getDepartures().observe(this.getViewLifecycleOwner(), this.departureListAdapter::setDepartureList);
-        });
+        this.viewModel.getDepartures().observe(this.getViewLifecycleOwner(), this.departureListAdapter::setDepartureList);
 
         this.viewModel.loadDeparturesForStation(this.stationId);
     }
