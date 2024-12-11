@@ -89,6 +89,8 @@ public class TripFragment extends Fragment {
         this.viewModel.getTripDetails().observe(this.getViewLifecycleOwner(), trip -> {
             this.departureListAdapter.setStopTimeList(trip.getStopTimes());
             this.dataBinding.viewTripDetails.setVisibility(View.VISIBLE);
+
+            this.departureListAdapter.selectItem(0);
         });
 
         this.viewModel.loadTripDetails(this.tripId);

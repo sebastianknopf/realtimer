@@ -16,10 +16,12 @@ import de.hka.realtimer.model.StopTimeWithStop;
 public class StopTimeListAdapter extends RecyclerView.Adapter<StopTimeListAdapter.ViewHolder> {
 
     private List<StopTimeWithStop> stopTimeList;
-    private OnItemSelectListener<StopTimeWithStop> onItemClickListener;
+    private OnItemSelectListener<StopTimeWithStop> onItemSelectListener;
+    private int selectedItemPosition;
 
     public StopTimeListAdapter() {
         this.stopTimeList = new ArrayList<>();
+        this.selectedItemPosition = -1;
     }
 
     public StopTimeListAdapter(List<StopTimeWithStop> stopTimeList) {
@@ -32,7 +34,17 @@ public class StopTimeListAdapter extends RecyclerView.Adapter<StopTimeListAdapte
     }
 
     public void setOnItemSelectListener(OnItemSelectListener<StopTimeWithStop> onItemClickListener) {
-        this.onItemClickListener = onItemClickListener;
+        this.onItemSelectListener = onItemClickListener;
+    }
+    
+    public void selectItem(int position) {
+        this.selectedItemPosition = position;
+
+        if (this.onItemSelectListener != null) {
+            this.onItemSelectListener.onItemSelect(this.stopTimeList.get(position));
+        }
+
+        this.notifyDataSetChanged();
     }
 
     @NonNull
@@ -46,7 +58,6 @@ public class StopTimeListAdapter extends RecyclerView.Adapter<StopTimeListAdapte
     public void onBindViewHolder(@NonNull StopTimeListAdapter.ViewHolder holder, int position) {
         StopTimeWithStop obj = this.stopTimeList.get(position);
         holder.setStopTime(obj);
-        holder.setOnItemClickListener(this.onItemClickListener);
     }
 
     @Override
@@ -54,7 +65,7 @@ public class StopTimeListAdapter extends RecyclerView.Adapter<StopTimeListAdapte
         return this.stopTimeList.size();
     }
 
-    static class ViewHolder extends RecyclerView.ViewHolder {
+    class ViewHolder extends RecyclerView.ViewHolder {
 
         public StopTimeItemBinding itemBinding;
 
@@ -66,14 +77,12 @@ public class StopTimeListAdapter extends RecyclerView.Adapter<StopTimeListAdapte
         public void setStopTime(StopTimeWithStop obj) {
             this.itemBinding.setStopTime(obj);
             this.itemBinding.executePendingBindings();
-        }
 
-        public void setOnItemClickListener(final OnItemSelectListener<StopTimeWithStop> listener) {
             this.itemBinding.getRoot().setOnClickListener(view -> {
-                if (listener != null) {
-                    listener.onItemSelect(this.itemBinding.getStopTime());
-                }
+                selectItem(this.getAdapterPosition());
             });
+
+            this.itemBinding.layoutStopTimeItem.setSelected(this.getAdapterPosition() == selectedItemPosition);
         }
     }
 }

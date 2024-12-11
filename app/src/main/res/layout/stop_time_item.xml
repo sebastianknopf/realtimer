@@ -11,9 +11,10 @@
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/layoutStopTimeItem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/selectableItemBackground"
+        android:background="@drawable/selectable_primary_item"
         android:paddingTop="16dp"
         android:paddingStart="8dp"
         android:paddingEnd="8dp"
