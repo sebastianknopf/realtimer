@@ -16,10 +16,42 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <LinearLayout
+            android:id="@+id/viewTripOverview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="32dp"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingBottom="32dp"
+            android:orientation="horizontal"
+            android:visibility="invisible">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:maxLines="1"
+                android:text="@{viewModel.tripDetails.headsign}"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium" />
+
+            <TextView
+                android:layout_width="48dp"
+                android:layout_height="wrap_content"
+                android:maxLines="1"
+                android:text="@{viewModel.currentDelayText}"
+                android:textStyle="bold"
+                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+                android:textAlignment="textEnd" />
+
+        </LinearLayout>
+
         <androidx.core.widget.NestedScrollView
             android:id="@+id/viewTripDetails"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_below="@id/viewTripOverview"
+            android:layout_alignParentBottom="true"
             android:visibility="invisible">
 
             <LinearLayout
@@ -38,6 +70,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    android:layout_marginBottom="8dp"
                     android:text="@string/trip_leave_trip"
                     android:backgroundTint="?attr/colorError" />
 

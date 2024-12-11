@@ -8,4 +8,5 @@
     <color name="color_primary_900">#00620f</color>
     <color name="color_secondary_200">#82d6f7</color>
     <color name="color_secondary_600">#009de2</color>
+    <color name="color_primary_selection">#9BC5A0</color>
 </resources>
