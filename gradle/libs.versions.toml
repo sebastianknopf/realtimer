@@ -1,5 +1,6 @@
 [versions]
 agp = "8.7.2"
+hivemqMqttClient = "1.3.0"
 maplibrePluginAnnotationV9 = "3.0.2"
 maplibreSdk = "11.5.1"
 junit = "4.13.2"
@@ -15,6 +16,7 @@ lifecycleViewmodelKtx = "2.6.1"
 navigationFragmentKtx = "2.8.4"
 
 [libraries]
+hivemq-mqtt-client = { module = "com.hivemq:hivemq-mqtt-client", version.ref = "hivemqMqttClient" }
 maplibre-plugin-annotation-v9 = { module = "org.maplibre.gl:android-plugin-annotation-v9", version.ref = "maplibrePluginAnnotationV9" }
 maplibre-android = { module = "org.maplibre.gl:android-sdk", version.ref = "maplibreSdk" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

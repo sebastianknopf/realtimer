@@ -6,6 +6,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
 
+import com.hivemq.client.mqtt.MqttClient;
+import com.hivemq.client.mqtt.mqtt5.Mqtt5BlockingClient;
+
 import org.gtfs.reader.GtfsReader;
 import org.gtfs.reader.GtfsSimpleDao;
 
@@ -141,11 +144,45 @@ public class DataUpdateViewModel extends AndroidViewModel {
     }
 
     public void verifyMqttConnection() {
-        try {
-            Thread.sleep(2500);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+        SharedPreferences sharedPreferences = this.getApplication().getSharedPreferences("de.hka.realtimer", Context.MODE_PRIVATE);
+        String mqttHost = sharedPreferences.getString(Config.MQTT_HOST, "test.mosquitto.org");
+        String mqttPort = sharedPreferences.getString(Config.MQTT_PORT, "1883");
+        String mqttUsername = sharedPreferences.getString(Config.MQTT_USERNAME, "username");
+        String mqttPassword = sharedPreferences.getString(Config.MQTT_PASSWORD, "password");
+
+        Mqtt5BlockingClient mqttClient = MqttClient.builder()
+                .serverHost(mqttHost)
+                .serverPort(Integer.parseInt(mqttPort))
+                .useMqttVersion5()
+                .buildBlocking();
+
+        mqttClient.connectWith()
+                .simpleAuth()
+                .username(mqttUsername)
+                .password(mqttPassword.getBytes())
+                .applySimpleAuth()
+                .send();
+
+        String topicTripUpdates = sharedPreferences.getString(Config.MQTT_TOPIC_TRIP_UPDATES, null);
+        String topicVehiclePositions = sharedPreferences.getString(Config.MQTT_TOPIC_VEHICLE_POSITIONS, null);
+
+        if (topicTripUpdates != null) {
+            mqttClient.publishWith()
+                    .topic(topicTripUpdates)
+                    .payload(new byte[]{})
+                    .retain(true)
+                    .send();
         }
+
+        if (topicVehiclePositions != null) {
+            mqttClient.publishWith()
+                    .topic(topicVehiclePositions)
+                    .payload(new byte[]{})
+                    .retain(true)
+                    .send();
+        }
+
+        mqttClient.disconnect();
     }
 
     public LiveData<DataUpdateStatus> getDataUpdateStatus() {
