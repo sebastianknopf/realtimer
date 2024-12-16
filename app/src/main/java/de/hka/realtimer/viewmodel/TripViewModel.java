@@ -1,23 +1,32 @@
 package de.hka.realtimer.viewmodel;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import android.app.Application;
+
+import com.google.transit.realtime.GtfsRealtime;
+
 import java.util.Calendar;
 import java.util.Date;
 
+import androidx.annotation.NonNull;
+import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 import de.hka.realtimer.data.GtfsRepository;
+import de.hka.realtimer.data.RealtimeRepository;
 import de.hka.realtimer.model.StopTimeWithStop;
+import de.hka.realtimer.model.TripWithRoute;
 import de.hka.realtimer.model.TripWithStopTimesAndRoute;
 
-public class TripViewModel extends ViewModel {
+public class TripViewModel extends AndroidViewModel {
 
     private MutableLiveData<TripWithStopTimesAndRoute> tripDetails;
     private MutableLiveData<String> currentDelayText;
 
-    public TripViewModel() {
+    private int differenceInMinutes;
+
+    public TripViewModel(@NonNull Application application) {
+        super(application);
+
         this.tripDetails = new MutableLiveData<>();
         this.currentDelayText = new MutableLiveData<>("#");
     }
@@ -45,26 +54,42 @@ public class TripViewModel extends ViewModel {
         Date stopDepartureTimestamp = calendar.getTime();
 
         long differenceInSeconds = referenceTimestamp.getTime() - stopDepartureTimestamp.getTime();
-        int differenceInMinutes = (int) Math.round(differenceInSeconds / (60 * 1000));
+        this.differenceInMinutes = Math.round(differenceInSeconds / (60 * 1000));
 
         String delayText = "#";
-        if (differenceInMinutes > 0) {
-            if (differenceInMinutes > 99) {
+        if (this.differenceInMinutes > 0) {
+            if (this.differenceInMinutes > 99) {
                 delayText = ">99";
             } else {
-                delayText = String.format("+%d", differenceInMinutes);
+                delayText = String.format("+%d", this.differenceInMinutes);
             }
-        } else if (differenceInMinutes < 0) {
+        } else if (this.differenceInMinutes < 0) {
             if (stopTime.getStopSequence() == 1) {
-                delayText = String.format("#%d", Math.abs(differenceInMinutes));
+                delayText = String.format("#%d", Math.abs(this.differenceInMinutes));
             } else {
-                delayText = String.format("%d", differenceInMinutes);
+                delayText = String.format("%d", this.differenceInMinutes);
             }
-        } else if (differenceInMinutes == 0) {
+        } else if (this.differenceInMinutes == 0) {
             delayText = String.format("+/-0");
         }
 
         this.currentDelayText.setValue(delayText);
+    }
+
+    public void sendTripRealtimeData(StopTimeWithStop stopTime) {
+        TripWithRoute trip = this.tripDetails.getValue();
+        if (trip != null) {
+            RealtimeRepository repository = RealtimeRepository.getInstance(this.getApplication().getApplicationContext());
+            repository.sendTripRealtimeData(trip, stopTime, this.differenceInMinutes);
+        }
+    }
+
+    public void deleteTripRealtimeData() {
+        TripWithRoute trip = this.tripDetails.getValue();
+        if (trip != null) {
+            RealtimeRepository repository = RealtimeRepository.getInstance(this.getApplication().getApplicationContext());
+            repository.deleteTripRealtimeData(trip);
+        }
     }
 
     public LiveData<TripWithStopTimesAndRoute> getTripDetails() {

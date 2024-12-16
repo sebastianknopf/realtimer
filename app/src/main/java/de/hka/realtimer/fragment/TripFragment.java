@@ -11,6 +11,7 @@ import androidx.navigation.NavController;
 import de.hka.realtimer.MainActivity;
 import de.hka.realtimer.R;
 import de.hka.realtimer.adpater.StopTimeListAdapter;
+import de.hka.realtimer.data.RealtimeRepository;
 import de.hka.realtimer.databinding.FragmentTripBinding;
 import de.hka.realtimer.model.StopTimeWithStop;
 import de.hka.realtimer.viewmodel.TripViewModel;
@@ -48,6 +49,9 @@ public class TripFragment extends Fragment {
         if (args != null) {
             this.tripId = args.getString(ARG_TRIP_ID, null);
         }
+
+        RealtimeRepository repository = RealtimeRepository.getInstance(this.getContext());
+        repository.connectBroker();
     }
 
     @Override
@@ -84,9 +88,12 @@ public class TripFragment extends Fragment {
             this.currentStopTime = item;
 
             this.viewModel.calculateCurrentDelay(this.currentStopTime);
+            this.viewModel.sendTripRealtimeData(this.currentStopTime);
         });
 
         this.dataBinding.btnLeaveTrip.setOnClickListener(btn -> {
+            this.viewModel.deleteTripRealtimeData();
+
             this.navigationController.navigate(R.id.action_tripFragment_to_mapFragment);
         });
 
@@ -99,5 +106,13 @@ public class TripFragment extends Fragment {
         });
 
         this.viewModel.loadTripDetails(this.tripId);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
+        RealtimeRepository repository = RealtimeRepository.getInstance(this.getContext());
+        repository.disconnectBroker();
     }
 }
