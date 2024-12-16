@@ -29,6 +29,7 @@ import de.hka.realtimer.common.Config;
 import de.hka.realtimer.common.DataUpdateStatus;
 import de.hka.realtimer.data.GtfsRelationalDao;
 import de.hka.realtimer.data.GtfsRepository;
+import de.hka.realtimer.data.RealtimeRepository;
 
 public class DataUpdateViewModel extends AndroidViewModel {
 
@@ -144,45 +145,8 @@ public class DataUpdateViewModel extends AndroidViewModel {
     }
 
     public void verifyMqttConnection() {
-        SharedPreferences sharedPreferences = this.getApplication().getSharedPreferences("de.hka.realtimer", Context.MODE_PRIVATE);
-        String mqttHost = sharedPreferences.getString(Config.MQTT_HOST, "test.mosquitto.org");
-        String mqttPort = sharedPreferences.getString(Config.MQTT_PORT, "1883");
-        String mqttUsername = sharedPreferences.getString(Config.MQTT_USERNAME, "username");
-        String mqttPassword = sharedPreferences.getString(Config.MQTT_PASSWORD, "password");
-
-        Mqtt5BlockingClient mqttClient = MqttClient.builder()
-                .serverHost(mqttHost)
-                .serverPort(Integer.parseInt(mqttPort))
-                .useMqttVersion5()
-                .buildBlocking();
-
-        mqttClient.connectWith()
-                .simpleAuth()
-                .username(mqttUsername)
-                .password(mqttPassword.getBytes())
-                .applySimpleAuth()
-                .send();
-
-        String topicTripUpdates = sharedPreferences.getString(Config.MQTT_TOPIC_TRIP_UPDATES, null);
-        String topicVehiclePositions = sharedPreferences.getString(Config.MQTT_TOPIC_VEHICLE_POSITIONS, null);
-
-        if (topicTripUpdates != null) {
-            mqttClient.publishWith()
-                    .topic(topicTripUpdates)
-                    .payload(new byte[]{})
-                    .retain(true)
-                    .send();
-        }
-
-        if (topicVehiclePositions != null) {
-            mqttClient.publishWith()
-                    .topic(topicVehiclePositions)
-                    .payload(new byte[]{})
-                    .retain(true)
-                    .send();
-        }
-
-        mqttClient.disconnect();
+        RealtimeRepository repository = RealtimeRepository.getInstance(this.getApplication().getApplicationContext());
+        repository.runConnectionTest();
     }
 
     public LiveData<DataUpdateStatus> getDataUpdateStatus() {
