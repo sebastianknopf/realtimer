@@ -101,6 +101,7 @@ public class RealtimeRepository {
         GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate = GtfsRealtime.TripUpdate.StopTimeUpdate.newBuilder()
                 .setStopId(stopTime.getStopId())
                 .setDeparture(stopTimeEvent)
+                .setScheduleRelationship(GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SCHEDULED)
                 .build();
 
         GtfsRealtime.TripUpdate tripUpdate = GtfsRealtime.TripUpdate.newBuilder()
