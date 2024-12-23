@@ -13,30 +13,36 @@ import de.hka.realtimer.R;
 import de.hka.realtimer.adpater.StopTimeListAdapter;
 import de.hka.realtimer.data.RealtimeRepository;
 import de.hka.realtimer.databinding.FragmentTripBinding;
+import de.hka.realtimer.model.StopTime;
 import de.hka.realtimer.viewmodel.TripViewModel;
 
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.Date;
+
 public class TripFragment extends Fragment {
 
     public final static String ARG_TRIP_ID = "ARG_TRIP_ID";
+    public final static String ARG_SERVICE_DAY = "ARG_SERVICE_DAY";
 
     private FragmentTripBinding dataBinding;
     private TripViewModel viewModel;
     private NavController navigationController;
 
     private String tripId;
-    //private StopTimeWithStop currentStopTime;
-    private final StopTimeListAdapter departureListAdapter;
+    private long serviceDay;
+
+    private StopTime currentStopTime;
+    private final StopTimeListAdapter stopTimeListAdapter;
 
     public static TripFragment newInstance() {
         return new TripFragment();
     }
 
     public TripFragment() {
-        this.departureListAdapter = new StopTimeListAdapter();
+        this.stopTimeListAdapter = new StopTimeListAdapter();
     }
 
     @Override
@@ -46,6 +52,7 @@ public class TripFragment extends Fragment {
         Bundle args = this.getArguments();
         if (args != null) {
             this.tripId = args.getString(ARG_TRIP_ID, null);
+            this.serviceDay = args.getLong(ARG_SERVICE_DAY, (new Date().getTime() / 1000L));
         }
 
         RealtimeRepository repository = RealtimeRepository.getInstance(this.getContext());
@@ -80,14 +87,14 @@ public class TripFragment extends Fragment {
         this.viewModel = new ViewModelProvider(this).get(TripViewModel.class);
         this.dataBinding.setViewModel(this.viewModel);
 
-        /*this.dataBinding.lstStopTimes.setAdapter(this.departureListAdapter);
+        this.dataBinding.lstStopTimes.setAdapter(this.stopTimeListAdapter);
 
-        this.departureListAdapter.setOnItemSelectListener(item -> {
+        this.stopTimeListAdapter.setOnItemSelectListener(item -> {
             this.currentStopTime = item;
 
             this.viewModel.calculateCurrentDelay(this.currentStopTime);
             this.viewModel.sendTripRealtimeData(this.currentStopTime);
-        });*/
+        });
 
         this.dataBinding.btnLeaveTrip.setOnClickListener(btn -> {
             this.viewModel.deleteTripRealtimeData();
@@ -95,15 +102,15 @@ public class TripFragment extends Fragment {
             this.navigationController.navigate(R.id.action_tripFragment_to_mapFragment);
         });
 
-        /*this.viewModel.getTripDetails().observe(this.getViewLifecycleOwner(), trip -> {
-            this.departureListAdapter.setStopTimeList(trip.getStopTimes());
-            this.dataBinding.viewTripOverview.setVisibility(ViewGroup.VISIBLE);
+        this.viewModel.getTripDetails().observe(this.getViewLifecycleOwner(), trip -> {
+            this.stopTimeListAdapter.setStopTimeList(trip.getStopTimes());
+            this.dataBinding.viewTripOverview.setVisibility(View.VISIBLE);
             this.dataBinding.viewTripDetails.setVisibility(View.VISIBLE);
 
-            this.departureListAdapter.selectItem(0);
-        });*/
+            this.stopTimeListAdapter.selectItem(0);
+        });
 
-        this.viewModel.loadTripDetails(this.tripId);
+        this.viewModel.loadTripDetails(this.tripId, this.serviceDay);
     }
 
     @Override

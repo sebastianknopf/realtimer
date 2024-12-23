@@ -18,6 +18,8 @@ import java.util.List;
 import de.hka.realtimer.common.Config;
 import de.hka.realtimer.model.Departure;
 import de.hka.realtimer.model.Station;
+import de.hka.realtimer.model.StopTime;
+import de.hka.realtimer.model.TripDetails;
 import de.hka.realtimer.otp.DeparturesListQuery;
 import de.hka.realtimer.otp.StationsListQuery;
 import de.hka.realtimer.otp.TripDetailsQuery;
@@ -29,7 +31,7 @@ public class OpenTripPlannerRepository {
 
     private MutableLiveData<List<Station>> stationsList;
     private MutableLiveData<List<Departure>> departuresList;
-    private MutableLiveData<TripDetailsQuery.Trip> tripDetails;
+    private MutableLiveData<TripDetails> tripDetails;
 
     private static OpenTripPlannerRepository singleInstance;
 
@@ -121,10 +123,38 @@ public class OpenTripPlannerRepository {
         });
     }
 
-    public void loadTripDetails(String tripId) {
+    public void loadTripDetails(String tripId, long serviceDay) {
         this.apolloClient.query(new TripDetailsQuery(tripId)).enqueue(response -> {
             if (response.data != null && response.data.trip != null) {
-                this.tripDetails.postValue(response.data.trip);
+                TripDetails tripDetails = new TripDetails();
+                tripDetails.setRouteId(response.data.trip.route.gtfsId);
+                tripDetails.setRouteName(response.data.trip.route.shortName);
+                tripDetails.setTripId(response.data.trip.gtfsId);
+                tripDetails.setHeadsign(response.data.trip.tripHeadsign);
+
+                List<StopTime> stopTimes = new ArrayList<>();
+                for (TripDetailsQuery.Stoptime obj : response.data.trip.stoptimes) {
+                    StopTime stopTime = new StopTime();
+                    stopTime.setStopId(obj.stop.gtfsId);
+                    stopTime.setStopName(obj.stop.name);
+                    stopTime.setStopSequence(obj.stopPosition);
+
+                    Date arrivalTime = new Date();
+                    arrivalTime.setTime((serviceDay + obj.scheduledArrival) * 1000L);
+
+                    stopTime.setArrivalTime(arrivalTime);
+
+                    Date departureTime = new Date();
+                    departureTime.setTime((serviceDay + obj.scheduledDeparture) * 1000L);
+
+                    stopTime.setDepartureTime(departureTime);
+
+                    stopTimes.add(stopTime);
+                }
+
+                tripDetails.setStopTimes(stopTimes);
+
+                this.tripDetails.postValue(tripDetails);
             } else {
                 this.tripDetails.postValue(null);
             }
@@ -139,7 +169,7 @@ public class OpenTripPlannerRepository {
         return this.departuresList;
     }
 
-    public LiveData<TripDetailsQuery.Trip> getTripDetails() {
+    public LiveData<TripDetails> getTripDetails() {
         return this.tripDetails;
     }
 }

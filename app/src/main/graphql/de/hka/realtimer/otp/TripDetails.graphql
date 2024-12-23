@@ -5,12 +5,13 @@ query TripDetails($id: String!) {
         tripGeometry {
             points
         }
-        stoptimesForDate {
+        stoptimes {
             stop {
                 gtfsId
                 name
                 platformCode
             }
+            stopPosition
             scheduledArrival
             scheduledDeparture
             realtime

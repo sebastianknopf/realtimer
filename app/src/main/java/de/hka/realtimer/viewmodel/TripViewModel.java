@@ -10,11 +10,14 @@ import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import de.hka.realtimer.data.OpenTripPlannerRepository;
 import de.hka.realtimer.data.RealtimeRepository;
+import de.hka.realtimer.model.StopTime;
+import de.hka.realtimer.model.TripDetails;
 
 public class TripViewModel extends AndroidViewModel {
 
-    //private MutableLiveData<TripWithStopTimesAndRoute> tripDetails;
+    private MutableLiveData<TripDetails> tripDetails;
     private MutableLiveData<String> currentDelayText;
 
     private int differenceInMinutes;
@@ -22,33 +25,19 @@ public class TripViewModel extends AndroidViewModel {
     public TripViewModel(@NonNull Application application) {
         super(application);
 
-        //this.tripDetails = new MutableLiveData<>();
+        this.tripDetails = new MutableLiveData<>();
         this.currentDelayText = new MutableLiveData<>("#");
     }
 
-    public void loadTripDetails(String tripId) {
-        Runnable runnable = () -> {
-            /*GtfsRepository repository = GtfsRepository.getInstance();
-            this.tripDetails.postValue(repository.getDataAccessObject().getTripDetails(tripId));*/
-        };
-
-        Thread thread = new Thread(runnable);
-        thread.start();
+    public void loadTripDetails(String tripId, long serviceDay) {
+        OpenTripPlannerRepository repository = OpenTripPlannerRepository.getInstance(this.getApplication().getApplicationContext());
+        repository.loadTripDetails(tripId, serviceDay);
     }
 
-    public void calculateCurrentDelay() {
-        /*Date referenceTimestamp = new Date();
+    public void calculateCurrentDelay(StopTime stopTime) {
+        Date referenceTimestamp = new Date();
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(referenceTimestamp);
-
-        calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(stopTime.getDepartureTime().substring(0, 2)));
-        calendar.set(Calendar.MINUTE, Integer.parseInt(stopTime.getDepartureTime().substring(3, 5)));
-        calendar.set(Calendar.SECOND, Integer.parseInt(stopTime.getDepartureTime().substring(6, 8)));
-
-        Date stopDepartureTimestamp = calendar.getTime();
-
-        long differenceInSeconds = referenceTimestamp.getTime() - stopDepartureTimestamp.getTime();
+        long differenceInSeconds = referenceTimestamp.getTime() - stopTime.getDepartureTime().getTime();
         this.differenceInMinutes = Math.round(differenceInSeconds / (60 * 1000));
 
         String delayText = "#";
@@ -68,10 +57,10 @@ public class TripViewModel extends AndroidViewModel {
             delayText = String.format("+/-0");
         }
 
-        this.currentDelayText.setValue(delayText);*/
+        this.currentDelayText.setValue(delayText);
     }
 
-    public void sendTripRealtimeData() {
+    public void sendTripRealtimeData(StopTime stopTime) {
         /*TripWithRoute trip = this.tripDetails.getValue();
         if (trip != null) {
             RealtimeRepository repository = RealtimeRepository.getInstance(this.getApplication().getApplicationContext());
@@ -87,9 +76,10 @@ public class TripViewModel extends AndroidViewModel {
         }*/
     }
 
-    /*public LiveData<TripWithStopTimesAndRoute> getTripDetails() {
-        return this.tripDetails;
-    }*/
+    public LiveData<TripDetails> getTripDetails() {
+        OpenTripPlannerRepository repository = OpenTripPlannerRepository.getInstance(this.getApplication().getApplicationContext());
+        return repository.getTripDetails();
+    }
 
     public LiveData<String> getCurrentDelayText() {
         return this.currentDelayText;
