@@ -11,6 +11,8 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import de.hka.realtimer.common.Config;
+import de.hka.realtimer.model.StopTime;
+import de.hka.realtimer.model.TripDetails;
 
 public class RealtimeRepository {
 
@@ -93,8 +95,8 @@ public class RealtimeRepository {
                 .send();
     }
 
-    public void sendTripRealtimeData() {
-        /*GtfsRealtime.TripDescriptor tripDescriptor = this.createTripDescriptor(trip);
+    public void sendTripRealtimeData(TripDetails tripDetails, StopTime stopTime, int departureDelayInMinutes) {
+        GtfsRealtime.TripDescriptor tripDescriptor = this.createTripDescriptor(tripDetails);
 
         GtfsRealtime.TripUpdate.StopTimeEvent stopTimeEvent = GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder()
                 .setDelay(departureDelayInMinutes * 60)
@@ -112,7 +114,7 @@ public class RealtimeRepository {
                 .build();
 
         GtfsRealtime.FeedEntity feedEntity = GtfsRealtime.FeedEntity.newBuilder()
-                .setId(trip.getTripId())
+                .setId(tripDetails.getTripId())
                 .setTripUpdate(tripUpdate)
                 .build();
 
@@ -127,18 +129,18 @@ public class RealtimeRepository {
                 .addEntity(feedEntity)
                 .build();
 
-        this.sendTripUpdate(feedMessage, trip.getRouteId(), trip.getTripId());*/
+        this.sendTripUpdate(feedMessage, tripDetails.getRouteId(), tripDetails.getTripId());
     }
 
-    public void deleteTripRealtimeData() {
-        /*GtfsRealtime.TripDescriptor tripDescriptor = this.createTripDescriptor(trip);
+    public void deleteTripRealtimeData(TripDetails tripDetails) {
+        GtfsRealtime.TripDescriptor tripDescriptor = this.createTripDescriptor(tripDetails);
 
         GtfsRealtime.TripUpdate tripUpdate = GtfsRealtime.TripUpdate.newBuilder()
                 .setTrip(tripDescriptor)
                 .build();
 
         GtfsRealtime.FeedEntity feedEntity = GtfsRealtime.FeedEntity.newBuilder()
-                .setId(trip.getTripId())
+                .setId(tripDetails.getTripId())
                 .setTripUpdate(tripUpdate)
                 .setIsDeleted(true)
                 .build();
@@ -154,7 +156,7 @@ public class RealtimeRepository {
                 .addEntity(feedEntity)
                 .build();
 
-        this.sendTripUpdate(feedMessage, trip.getRouteId(), trip.getTripId());*/
+        this.sendTripUpdate(feedMessage, tripDetails.getRouteId(), tripDetails.getTripId());
     }
 
     private void sendTripUpdate(GtfsRealtime.FeedMessage feedMessage, String routeId, String tripId) {
@@ -189,14 +191,13 @@ public class RealtimeRepository {
         }
     }
 
-    private GtfsRealtime.TripDescriptor createTripDescriptor() {
-        /*GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
-        tripDescriptorBuilder.setTripId(trip.getTripId());
-        tripDescriptorBuilder.setRouteId(trip.getRouteId());
+    private GtfsRealtime.TripDescriptor createTripDescriptor(TripDetails tripDetails) {
+        GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
+        tripDescriptorBuilder.setTripId(tripDetails.getTripId());
+        tripDescriptorBuilder.setRouteId(tripDetails.getRouteId());
         tripDescriptorBuilder.setScheduleRelationship(GtfsRealtime.TripDescriptor.ScheduleRelationship.SCHEDULED);
 
-        return tripDescriptorBuilder.build();*/
-        return null;
+        return tripDescriptorBuilder.build();
     }
 
     public void disconnectBroker() {

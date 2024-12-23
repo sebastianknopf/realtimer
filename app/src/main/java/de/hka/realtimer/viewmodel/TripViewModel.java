@@ -17,7 +17,6 @@ import de.hka.realtimer.model.TripDetails;
 
 public class TripViewModel extends AndroidViewModel {
 
-    private MutableLiveData<TripDetails> tripDetails;
     private MutableLiveData<String> currentDelayText;
 
     private int differenceInMinutes;
@@ -25,7 +24,6 @@ public class TripViewModel extends AndroidViewModel {
     public TripViewModel(@NonNull Application application) {
         super(application);
 
-        this.tripDetails = new MutableLiveData<>();
         this.currentDelayText = new MutableLiveData<>("#");
     }
 
@@ -61,19 +59,19 @@ public class TripViewModel extends AndroidViewModel {
     }
 
     public void sendTripRealtimeData(StopTime stopTime) {
-        /*TripWithRoute trip = this.tripDetails.getValue();
-        if (trip != null) {
+        TripDetails tripDetails = OpenTripPlannerRepository.getInstance(this.getApplication().getApplicationContext()).getTripDetails().getValue();
+        if (tripDetails != null) {
             RealtimeRepository repository = RealtimeRepository.getInstance(this.getApplication().getApplicationContext());
-            repository.sendTripRealtimeData(trip, stopTime, this.differenceInMinutes);
-        }*/
+            repository.sendTripRealtimeData(tripDetails, stopTime, this.differenceInMinutes);
+        }
     }
 
     public void deleteTripRealtimeData() {
-        /*TripWithRoute trip = this.tripDetails.getValue();
-        if (trip != null) {
+        TripDetails tripDetails = OpenTripPlannerRepository.getInstance(this.getApplication().getApplicationContext()).getTripDetails().getValue();
+        if (tripDetails != null) {
             RealtimeRepository repository = RealtimeRepository.getInstance(this.getApplication().getApplicationContext());
-            repository.deleteTripRealtimeData(trip);
-        }*/
+            repository.deleteTripRealtimeData(tripDetails);
+        }
     }
 
     public LiveData<TripDetails> getTripDetails() {
