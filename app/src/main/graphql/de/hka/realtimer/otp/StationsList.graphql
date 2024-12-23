@@ -1,0 +1,8 @@
+query StationsList {
+    stations {
+        gtfsId
+        name
+        lat
+        lon
+    }
+}

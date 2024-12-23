@@ -1,0 +1,25 @@
+query TripDetails($id: String!) {
+    trip(id: $id) {
+        gtfsId
+        tripHeadsign
+        tripGeometry {
+            points
+        }
+        stoptimesForDate {
+            stop {
+                gtfsId
+                name
+                platformCode
+            }
+            scheduledArrival
+            scheduledDeparture
+            realtime
+            realtimeState
+        }
+        route {
+            gtfsId
+            shortName
+            mode
+        }
+    }
+}

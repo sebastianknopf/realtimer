@@ -1,0 +1,78 @@
+plugins {
+    alias(libs.plugins.android.application)
+
+    id("com.apollographql.apollo").version("4.1.0")
+}
+
+apollo {
+    service("otp") {
+        packageName.set("de.hka.realtimer.otp")
+
+        introspection {
+            endpointUrl.set("https://otp.svprod01.app/otp/routers/default/index/graphql/")
+            schemaFile.set(file("src/main/graphql/de/hka/realtimer/otp/schema.graphqls"))
+        }
+    }
+}
+
+android {
+    namespace 'de.hka.realtimer'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "de.hka.realtimer"
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    packagingOptions {
+        resources {
+            excludes += ['META-INF/INDEX.LIST', 'META-INF/io.netty.versions.properties']
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    dataBinding {
+        enabled = true
+    }
+}
+
+dependencies {
+
+    implementation libs.appcompat
+    implementation libs.material
+    implementation libs.activity
+    implementation libs.constraintlayout
+    implementation libs.legacy.support.v4
+    implementation libs.lifecycle.livedata.ktx
+    implementation libs.lifecycle.viewmodel.ktx
+
+    implementation libs.navigation.fragment.ktx
+    implementation libs.navigation.ui.ktx
+
+    implementation libs.maplibre.android
+    implementation libs.maplibre.plugin.annotation.v9
+    implementation libs.apollo.javaClient
+    implementation libs.hivemq.mqtt.client
+    implementation libs.gtfs.realtime.bindings
+
+    testImplementation libs.junit
+    androidTestImplementation libs.ext.junit
+    androidTestImplementation libs.espresso.core
+
+
+}

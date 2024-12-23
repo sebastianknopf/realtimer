@@ -1,0 +1,25 @@
+query DeparturesList($id: String!, $startTime: Long!) {
+    station(id: $id) {
+        gtfsId
+        name
+        stops {
+            gtfsId
+            name
+            platformCode
+            stoptimesWithoutPatterns(startTime: $startTime, omitNonPickups: true, numberOfDepartures: 1000) {
+                serviceDay
+                scheduledDeparture
+                realtime
+                trip {
+                    gtfsId
+                    tripHeadsign
+                    route {
+                        gtfsId
+                        shortName
+                        mode
+                    }
+                }
+            }
+        }
+    }
+}
