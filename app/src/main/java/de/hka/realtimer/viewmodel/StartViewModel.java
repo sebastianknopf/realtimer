@@ -27,6 +27,8 @@ public class StartViewModel extends AndroidViewModel {
     public void runDataUpdate() {
         Runnable runnable = () -> {
             try {
+                this.dataUpdateStatus.postValue(InitializationStatus.INITIAL);
+
                 this.dataUpdateMessage.postValue(this.getApplication().getString(R.string.start_mqtt_test));
                 this.verifyMqttConnection();
 

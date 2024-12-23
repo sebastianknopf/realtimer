@@ -1,5 +1,6 @@
 package de.hka.realtimer.model;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class Departure {
@@ -106,5 +107,10 @@ public class Departure {
 
     public void setRealtimeAvailable(boolean realtimeAvailable) {
         this.realtimeAvailable = realtimeAvailable;
+    }
+
+    public String getFormattedDepartureTimeString() {
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+        return sdf.format(this.getDepartureTime());
     }
 }

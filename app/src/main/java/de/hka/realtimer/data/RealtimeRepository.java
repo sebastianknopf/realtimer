@@ -8,6 +8,7 @@ import com.hivemq.client.mqtt.MqttClient;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5BlockingClient;
 
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 import de.hka.realtimer.common.Config;
 
@@ -37,6 +38,10 @@ public class RealtimeRepository {
                 .serverHost(mqttHost)
                 .serverPort(Integer.parseInt(mqttPort))
                 .useMqttVersion5()
+                .transportConfig()
+                .mqttConnectTimeout(30, TimeUnit.SECONDS)
+                .socketConnectTimeout(30, TimeUnit.SECONDS)
+                .applyTransportConfig()
                 .buildBlocking();
     }
 

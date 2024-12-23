@@ -11,26 +11,27 @@ import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 import de.hka.realtimer.R;
 import de.hka.realtimer.databinding.DepartureItemBinding;
+import de.hka.realtimer.model.Departure;
 
-public class DepartureListAdapter /*extends RecyclerView.Adapter<DepartureListAdapter.ViewHolder>*/ {
+public class DepartureListAdapter extends RecyclerView.Adapter<DepartureListAdapter.ViewHolder> {
 
-    /*private List<DepartureWithStopAndTrip> departureList;
-    private OnItemClickListener<DepartureWithStopAndTrip> onItemClickListener;
+    private List<Departure> departureList;
+    private OnItemClickListener<Departure> onItemClickListener;
 
     public DepartureListAdapter() {
         this.departureList = new ArrayList<>();
     }
 
-    public DepartureListAdapter(List<DepartureWithStopAndTrip> departureList) {
+    public DepartureListAdapter(List<Departure> departureList) {
         this.departureList = departureList;
     }
 
-    public void setDepartureList(List<DepartureWithStopAndTrip> departureList) {
+    public void setDepartureList(List<Departure> departureList) {
         this.departureList = departureList;
         this.notifyDataSetChanged();
     }
 
-    public void setOnItemClickListener(OnItemClickListener<DepartureWithStopAndTrip> onItemClickListener) {
+    public void setOnItemClickListener(OnItemClickListener<Departure> onItemClickListener) {
         this.onItemClickListener = onItemClickListener;
     }
 
@@ -43,7 +44,7 @@ public class DepartureListAdapter /*extends RecyclerView.Adapter<DepartureListAd
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        DepartureWithStopAndTrip obj = this.departureList.get(position);
+        Departure obj = this.departureList.get(position);
         holder.setDeparture(obj);
         holder.setOnItemClickListener(this.onItemClickListener);
     }
@@ -62,7 +63,7 @@ public class DepartureListAdapter /*extends RecyclerView.Adapter<DepartureListAd
             this.itemBinding = itemBinding;
         }
 
-        public void setDeparture(DepartureWithStopAndTrip obj) {
+        public void setDeparture(Departure obj) {
             this.itemBinding.setDeparture(obj);
             this.itemBinding.executePendingBindings();
 
@@ -94,15 +95,15 @@ public class DepartureListAdapter /*extends RecyclerView.Adapter<DepartureListAd
                 default:
 
                     break;
-            }
+            }*/
         }
 
-        public void setOnItemClickListener(final OnItemClickListener<DepartureWithStopAndTrip> listener) {
+        public void setOnItemClickListener(final OnItemClickListener<Departure> listener) {
             this.itemBinding.getRoot().setOnClickListener(view -> {
                 if (listener != null) {
                     listener.onItemClick(this.itemBinding.getDeparture());
                 }
             });
         }
-    }*/
+    }
 }

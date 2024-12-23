@@ -80,16 +80,16 @@ public class DepartureFragment extends Fragment {
         this.viewModel = new ViewModelProvider(this).get(DepartureViewModel.class);
         this.dataBinding.setViewModel(this.viewModel);
 
-        /*this.dataBinding.lstDepartures.setAdapter(this.departureListAdapter);
+        this.dataBinding.lstDepartures.setAdapter(this.departureListAdapter);
 
         this.departureListAdapter.setOnItemClickListener(item -> {
             Bundle bundle = new Bundle();
-            bundle.putString(TripFragment.ARG_TRIP_ID, item.getTrip().getTripId());
+            bundle.putString(TripFragment.ARG_TRIP_ID, item.getTripId());
 
             this.navigationController.navigate(R.id.action_departureFragment_to_tripFragment, bundle);
         });
 
-        this.viewModel.getDepartures().observe(this.getViewLifecycleOwner(), this.departureListAdapter::setDepartureList);*/
+        this.viewModel.getDeparturesList().observe(this.getViewLifecycleOwner(), this.departureListAdapter::setDepartureList);
 
         this.viewModel.loadDeparturesForStation(this.stationId);
     }

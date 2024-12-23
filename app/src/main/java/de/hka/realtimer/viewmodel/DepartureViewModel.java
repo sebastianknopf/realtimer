@@ -26,13 +26,6 @@ public class DepartureViewModel extends AndroidViewModel {
 
     public void loadDeparturesForStation(String stationId) {
         OpenTripPlannerRepository repository = OpenTripPlannerRepository.getInstance(this.getApplication().getApplicationContext());
-
-        repository.getDepartureList().observeForever(departures -> {
-            for (Departure departure : departures) {
-                Log.d(this.getClass().getSimpleName(), departure.getDepartureTime().toString() + " " + departure.getRouteName() + " " + departure.getTripHeadsign() + " Steig " + departure.getPlatformCode());
-            }
-        });
-
         repository.loadDepartures(stationId);
     }
 
