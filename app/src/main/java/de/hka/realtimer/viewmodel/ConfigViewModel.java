@@ -60,7 +60,7 @@ public class ConfigViewModel extends AndroidViewModel {
     public void loadApplicationConfig() {
         SharedPreferences sharedPreferences = this.getApplication().getSharedPreferences("de.hka.realtimer", Context.MODE_PRIVATE);
 
-        this.otpGraphQlApiUrl.setValue(sharedPreferences.getString(Config.OTP_GRAPHQL_API_URL, "https://otp.svprod01.app/graphiql?flavor=gtfs"));
+        this.otpGraphQlApiUrl.setValue(sharedPreferences.getString(Config.OTP_GRAPHQL_API_URL, "https://otp.svprod01.app/otp/gtfs/v1"));
         this.mqttHost.setValue(sharedPreferences.getString(Config.MQTT_HOST, "mqtt.svprod01.app"));
         this.mqttPort.setValue(sharedPreferences.getString(Config.MQTT_PORT, "1883"));
         this.mqttUsername.setValue(sharedPreferences.getString(Config.MQTT_USERNAME, ""));
