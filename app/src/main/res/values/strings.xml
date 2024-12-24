@@ -4,13 +4,17 @@
     <string name="str_save">Speichern</string>
     <string name="str_config">Einstellungen</string>
 
-    <!-- Map Fragment -->
-    <string name="map_title">Realtimer</string>
-
     <!-- StartFragment -->
     <string name="start_title">Initialisierung</string>
     <string name="start_mqtt_test">Verbindungstest ...</string>
     <string name="start_init_error">Fehler bei der Initialisierung!</string>
+
+    <!-- Map Fragment -->
+    <string name="map_title">Realtimer</string>
+
+    <!-- TripFragment -->
+    <string name="trip_title">Aktuelle Fahrt</string>
+    <string name="trip_leave_trip">Fahrt beenden</string>
 
     <!-- Config Fragment -->
     <string name="config_title">Einstellungen</string>
@@ -26,7 +30,6 @@
     <string name="config_send_vehicle_positions">Fahrzeugpositionen senden</string>
     <string name="config_vehicle_id">Fahrzeug-ID</string>
 
-    <!-- TripFragment -->
-    <string name="trip_title">Aktuelle Fahrt</string>
-    <string name="trip_leave_trip">Fahrt beenden</string>
+    <!-- Departure Item -->
+    <string name="departure_platform_code">Steig %s</string>
 </resources>

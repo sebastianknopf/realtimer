@@ -42,7 +42,8 @@
             android:singleLine="true"
             android:ellipsize="end"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintLeft_toRightOf="@id/lblDepartureTime"
+            app:layout_constraintStart_toEndOf="@id/lblDepartureTime"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
