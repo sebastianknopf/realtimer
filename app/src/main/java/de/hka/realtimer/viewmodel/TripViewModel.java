@@ -58,19 +58,19 @@ public class TripViewModel extends AndroidViewModel {
         this.currentDelayText.setValue(delayText);
     }
 
-    public void sendTripRealtimeData(StopTime stopTime) {
+    public void sendTripRealtimeData(StopTime stopTime, long serviceDay) {
         TripDetails tripDetails = OpenTripPlannerRepository.getInstance(this.getApplication().getApplicationContext()).getTripDetails().getValue();
         if (tripDetails != null) {
             RealtimeRepository repository = RealtimeRepository.getInstance(this.getApplication().getApplicationContext());
-            repository.sendTripRealtimeData(tripDetails, stopTime, this.differenceInMinutes);
+            repository.sendTripRealtimeData(tripDetails, stopTime, serviceDay, this.differenceInMinutes);
         }
     }
 
-    public void deleteTripRealtimeData() {
+    public void deleteTripRealtimeData(long serviceDay) {
         TripDetails tripDetails = OpenTripPlannerRepository.getInstance(this.getApplication().getApplicationContext()).getTripDetails().getValue();
         if (tripDetails != null) {
             RealtimeRepository repository = RealtimeRepository.getInstance(this.getApplication().getApplicationContext());
-            repository.deleteTripRealtimeData(tripDetails);
+            repository.deleteTripRealtimeData(tripDetails, serviceDay);
         }
     }
 
