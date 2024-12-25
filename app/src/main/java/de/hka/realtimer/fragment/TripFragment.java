@@ -2,6 +2,11 @@ package de.hka.realtimer.fragment;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -45,6 +50,7 @@ public class TripFragment extends Fragment {
     private final StopTimeListAdapter stopTimeListAdapter;
 
     private ActivityResultLauncher<String> locationPermissionLauncher;
+    private LocationListener locationListener;
 
     public static TripFragment newInstance() {
         return new TripFragment();
@@ -69,7 +75,7 @@ public class TripFragment extends Fragment {
 
         this.locationPermissionLauncher = this.registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
             if (isGranted) {
-                this.enableLocationComponent();
+                this.enableLocationUpdates();
             } else {
                 Log.d(this.getClass().getSimpleName(), "Location permission refused!");
             }
@@ -139,6 +145,8 @@ public class TripFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+
+        this.disableLocationUpdates();
     }
 
     @Override
@@ -151,14 +159,30 @@ public class TripFragment extends Fragment {
 
     private void checkLocationPermission() {
         if (PermissionsManager.areLocationPermissionsGranted(this.getContext())) {
-            this.enableLocationComponent();
+            this.enableLocationUpdates();
         } else {
             this.locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
         }
     }
 
     @SuppressLint("MissingPermission")
-    private void enableLocationComponent() {
+    private void enableLocationUpdates() {
         Log.d(this.getClass().getSimpleName(), "Location Updater started!");
+
+        this.locationListener = location -> {
+            Log.d(this.getClass().getSimpleName(), "Location " + location.toString());
+        };
+
+        LocationManager locationManager = (LocationManager) this.getContext().getSystemService(Context.LOCATION_SERVICE);
+        if (Build.VERSION.SDK_INT > 30) {
+            locationManager.requestLocationUpdates(LocationManager.FUSED_PROVIDER, 50, 1000, this.locationListener);
+        } else {
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 50, 1000, this.locationListener);
+        }
+    }
+
+    private void disableLocationUpdates() {
+        LocationManager locationManager = (LocationManager) this.getContext().getSystemService(Context.LOCATION_SERVICE);
+        locationManager.removeUpdates(this.locationListener);
     }
 }
