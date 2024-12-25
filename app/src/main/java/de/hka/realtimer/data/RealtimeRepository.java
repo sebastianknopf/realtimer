@@ -3,8 +3,6 @@ package de.hka.realtimer.data;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import androidx.annotation.Nullable;
-
 import com.google.transit.realtime.GtfsRealtime;
 import com.hivemq.client.mqtt.MqttClient;
 import com.hivemq.client.mqtt.mqtt5.Mqtt5BlockingClient;
@@ -106,7 +104,7 @@ public class RealtimeRepository {
                 .build();
 
         GtfsRealtime.TripUpdate.StopTimeUpdate stopTimeUpdate = GtfsRealtime.TripUpdate.StopTimeUpdate.newBuilder()
-                .setStopId(this.sanitizeGtfsId(stopTime.getStopId()))
+                .setStopId(this.stripFeedId(stopTime.getStopId()))
                 .setDeparture(stopTimeEvent)
                 .setScheduleRelationship(GtfsRealtime.TripUpdate.StopTimeUpdate.ScheduleRelationship.SCHEDULED)
                 .build();
@@ -117,7 +115,7 @@ public class RealtimeRepository {
                 .build();
 
         GtfsRealtime.FeedEntity feedEntity = GtfsRealtime.FeedEntity.newBuilder()
-                .setId(this.sanitizeGtfsId(tripDetails.getTripId()))
+                .setId(this.stripFeedId(tripDetails.getTripId()))
                 .setTripUpdate(tripUpdate)
                 .build();
 
@@ -143,7 +141,7 @@ public class RealtimeRepository {
                 .build();
 
         GtfsRealtime.FeedEntity feedEntity = GtfsRealtime.FeedEntity.newBuilder()
-                .setId(this.sanitizeGtfsId(tripDetails.getTripId()))
+                .setId(this.stripFeedId(tripDetails.getTripId()))
                 .setTripUpdate(tripUpdate)
                 .setIsDeleted(true)
                 .build();
@@ -167,7 +165,7 @@ public class RealtimeRepository {
 
         if (sharedPreferences.getBoolean(Config.SEND_TRIP_UPDATES, false)) {
             String topicTripUpdates = sharedPreferences.getString(Config.MQTT_TOPIC_TRIP_UPDATES, "");
-            topicTripUpdates = String.format("%s/%s/%s", topicTripUpdates, this.sanitizeGtfsId(routeId), this.sanitizeGtfsId(tripId));
+            topicTripUpdates = String.format("%s/%s/%s", topicTripUpdates, this.stripFeedId(routeId), this.stripFeedId(tripId));
 
             this.mqttClient.publishWith()
                     .topic(topicTripUpdates)
@@ -196,14 +194,14 @@ public class RealtimeRepository {
 
     private GtfsRealtime.TripDescriptor createTripDescriptor(TripDetails tripDetails, long serviceDay) {
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
-        tripDescriptorBuilder.setTripId(this.sanitizeGtfsId(tripDetails.getTripId()));
-        tripDescriptorBuilder.setRouteId(this.sanitizeGtfsId(tripDetails.getRouteId()));
+        tripDescriptorBuilder.setTripId(this.stripFeedId(tripDetails.getTripId()));
+        tripDescriptorBuilder.setRouteId(this.stripFeedId(tripDetails.getRouteId()));
 
         if (serviceDay != 0) {
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
             Date serviceDate = new Date();
             serviceDate.setTime(serviceDay * 1000L);
 
+            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
             tripDescriptorBuilder.setStartDate(sdf.format(serviceDate));
         }
 
@@ -218,8 +216,8 @@ public class RealtimeRepository {
         }
     }
 
-    public String sanitizeGtfsId(String gtfsId) {
+    public String stripFeedId(String gtfsId) {
         String feedId = "1";
-        return gtfsId.replaceAll("^1:", "");
+        return gtfsId.replaceAll("^" + feedId + ":", "");
     }
 }

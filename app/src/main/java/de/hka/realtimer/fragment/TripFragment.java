@@ -92,12 +92,11 @@ public class TripFragment extends Fragment {
         this.stopTimeListAdapter.setOnItemSelectListener(item -> {
             this.currentStopTime = item;
 
-            this.viewModel.calculateCurrentDelay(this.currentStopTime);
-            this.viewModel.sendTripRealtimeData(this.currentStopTime, this.serviceDay);
+            this.viewModel.updateTimetableDifference(this.currentStopTime);
         });
 
         this.dataBinding.btnLeaveTrip.setOnClickListener(btn -> {
-            this.viewModel.deleteTripRealtimeData(this.serviceDay);
+            this.viewModel.deleteRealtimeData();
 
             this.navigationController.navigate(R.id.action_tripFragment_to_mapFragment);
         });
