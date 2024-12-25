@@ -65,8 +65,8 @@ public class MapFragment extends Fragment {
     private Style mapStyle;
     private SymbolManager mapSymbolManager;
 
-    private Location location;
     private ActivityResultLauncher<String> locationPermissionLauncher;
+    private LocationEngineCallback<LocationEngineResult> locationEngineCallback;
 
     public static MapFragment newInstance() {
         return new MapFragment();
@@ -197,11 +197,14 @@ public class MapFragment extends Fragment {
         this.dataBinding.mapView.onSaveInstanceState(outState);
     }
 
+    @SuppressLint("MissingPermission")
     @Override
     public void onPause() {
         super.onPause();
 
         this.dataBinding.mapView.onPause();
+
+        this.disableLocationComponent();
     }
 
     @Override
@@ -247,8 +250,8 @@ public class MapFragment extends Fragment {
                 .pulseEnabled(true)
                 .build();
 
-        LocationEngineRequest locationEngineRequest = new LocationEngineRequest.Builder(750)
-                .setFastestInterval(750)
+        LocationEngineRequest locationEngineRequest = new LocationEngineRequest.Builder(5000)
+                .setFastestInterval(5000)
                 .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
                 .build();
 
@@ -258,11 +261,7 @@ public class MapFragment extends Fragment {
                 .locationEngineRequest(locationEngineRequest)
                 .build();
 
-        LocationComponent locationComponent = this.map.getLocationComponent();
-        locationComponent.activateLocationComponent(locationComponentActivationOptions);
-        locationComponent.setLocationComponentEnabled(true);
-        locationComponent.setCameraMode(CameraMode.TRACKING);
-        locationComponent.getLocationEngine().requestLocationUpdates(locationEngineRequest, new LocationEngineCallback<LocationEngineResult>() {
+        this.locationEngineCallback = new LocationEngineCallback<>() {
             @Override
             public void onSuccess(LocationEngineResult locationEngineResult) {
                 findClosestStations(locationEngineResult.getLastLocation());
@@ -272,13 +271,26 @@ public class MapFragment extends Fragment {
             public void onFailure(@NonNull Exception e) {
                 Log.d(this.getClass().getSimpleName(), "Location update failed!");
             }
-        }, null);
+        };
+
+        LocationComponent locationComponent = this.map.getLocationComponent();
+        locationComponent.activateLocationComponent(locationComponentActivationOptions);
+        locationComponent.setLocationComponentEnabled(true);
+        locationComponent.setCameraMode(CameraMode.TRACKING);
+        locationComponent.getLocationEngine().requestLocationUpdates(locationEngineRequest, this.locationEngineCallback, null);
+    }
+
+    @SuppressLint("MissingPermission")
+    private void disableLocationComponent() {
+        LocationComponent locationComponent = this.map.getLocationComponent();
+        locationComponent.setLocationComponentEnabled(false);
+        locationComponent.getLocationEngine().removeLocationUpdates(this.locationEngineCallback);
     }
 
     private void findClosestStations(Location location) {
         List<Station> stationList = this.viewModel.getStationList().getValue();
         if (stationList != null) {
-            Collections.sort(stationList, (s1, s2) -> {
+            stationList.sort((s1, s2) -> {
                 Location loc1 = new Location("GPS");
                 loc1.setLatitude(s1.getLatitude());
                 loc1.setLongitude(s1.getLongitude());
