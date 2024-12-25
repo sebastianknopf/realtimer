@@ -1,7 +1,11 @@
 package de.hka.realtimer.fragment;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
@@ -16,9 +20,12 @@ import de.hka.realtimer.databinding.FragmentTripBinding;
 import de.hka.realtimer.model.StopTime;
 import de.hka.realtimer.viewmodel.TripViewModel;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+
+import org.maplibre.android.location.permissions.PermissionsManager;
 
 import java.util.Date;
 
@@ -36,6 +43,8 @@ public class TripFragment extends Fragment {
 
     private StopTime currentStopTime;
     private final StopTimeListAdapter stopTimeListAdapter;
+
+    private ActivityResultLauncher<String> locationPermissionLauncher;
 
     public static TripFragment newInstance() {
         return new TripFragment();
@@ -57,6 +66,14 @@ public class TripFragment extends Fragment {
 
         RealtimeRepository repository = RealtimeRepository.getInstance(this.getContext());
         repository.connectBroker();
+
+        this.locationPermissionLauncher = this.registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+            if (isGranted) {
+                this.enableLocationComponent();
+            } else {
+                Log.d(this.getClass().getSimpleName(), "Location permission refused!");
+            }
+        });
     }
 
     @Override
@@ -113,10 +130,35 @@ public class TripFragment extends Fragment {
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+
+        this.checkLocationPermission();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
 
         RealtimeRepository repository = RealtimeRepository.getInstance(this.getContext());
         repository.disconnectBroker();
+    }
+
+    private void checkLocationPermission() {
+        if (PermissionsManager.areLocationPermissionsGranted(this.getContext())) {
+            this.enableLocationComponent();
+        } else {
+            this.locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+    }
+
+    @SuppressLint("MissingPermission")
+    private void enableLocationComponent() {
+        Log.d(this.getClass().getSimpleName(), "Location Updater started!");
     }
 }
