@@ -5,26 +5,17 @@ import java.util.Date;
 
 public class StopTime {
 
-    private String stopId;
-    private String stopName;
+    private Stop stop;
     private int stopSequence;
     private Date arrivalTime;
     private Date departureTime;
 
-    public String getStopId() {
-        return this.stopId;
+    public Stop getStop() {
+        return this.stop;
     }
 
-    public void setStopId(String stopId) {
-        this.stopId = stopId;
-    }
-
-    public String getStopName() {
-        return this.stopName;
-    }
-
-    public void setStopName(String stopName) {
-        this.stopName = stopName;
+    public void setStop(Stop stop) {
+        this.stop = stop;
     }
 
     public int getStopSequence() {

@@ -10,6 +10,8 @@ query TripDetails($id: String!) {
                 gtfsId
                 name
                 platformCode
+                lat
+                lon
             }
             stopPosition
             scheduledArrival

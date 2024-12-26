@@ -18,6 +18,7 @@ import java.util.List;
 import de.hka.realtimer.common.Config;
 import de.hka.realtimer.model.Departure;
 import de.hka.realtimer.model.Station;
+import de.hka.realtimer.model.Stop;
 import de.hka.realtimer.model.StopTime;
 import de.hka.realtimer.model.TripDetails;
 import de.hka.realtimer.otp.DeparturesListQuery;
@@ -134,9 +135,14 @@ public class OpenTripPlannerRepository {
 
                 List<StopTime> stopTimes = new ArrayList<>();
                 for (TripDetailsQuery.Stoptime obj : response.data.trip.stoptimes) {
+                    Stop stop = new Stop();
+                    stop.setId(obj.stop.gtfsId);
+                    stop.setName(obj.stop.name);
+                    stop.setLatitude(obj.stop.lat);
+                    stop.setLongitude(obj.stop.lon);
+
                     StopTime stopTime = new StopTime();
-                    stopTime.setStopId(obj.stop.gtfsId);
-                    stopTime.setStopName(obj.stop.name);
+                    stopTime.setStop(stop);
                     stopTime.setStopSequence(obj.stopPosition);
 
                     Date arrivalTime = new Date();
