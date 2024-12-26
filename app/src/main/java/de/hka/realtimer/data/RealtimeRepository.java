@@ -2,6 +2,7 @@ package de.hka.realtimer.data;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.location.Location;
 
 import com.google.transit.realtime.GtfsRealtime;
 import com.hivemq.client.mqtt.MqttClient;
@@ -160,6 +161,80 @@ public class RealtimeRepository {
         this.sendTripUpdate(feedMessage, tripDetails.getRouteId(), tripDetails.getTripId());
     }
 
+    public void sendVehicleRealtimeData(Location location, TripDetails tripDetails, StopTime stopTime, long serviceDay) {
+        GtfsRealtime.VehicleDescriptor vehicleDescriptor = this.createVehicleDescriptor();
+
+        GtfsRealtime.Position position = GtfsRealtime.Position.newBuilder()
+                .setLatitude((float) location.getLatitude())
+                .setLongitude((float) location.getLongitude())
+                .build();
+
+        GtfsRealtime.VehiclePosition.Builder vehiclePositionBuilder = GtfsRealtime.VehiclePosition.newBuilder();
+        vehiclePositionBuilder.setVehicle(vehicleDescriptor);
+        vehiclePositionBuilder.setPosition(position);
+
+        Date timestamp = new Date();
+        vehiclePositionBuilder.setTimestamp(timestamp.getTime() / 1000L);
+
+        if (tripDetails != null) {
+            GtfsRealtime.TripDescriptor tripDescriptor = this.createTripDescriptor(tripDetails, serviceDay);
+            vehiclePositionBuilder.setTrip(tripDescriptor);
+        }
+
+        if (stopTime != null) {
+            vehiclePositionBuilder.setStopId(stopTime.getStop().getId());
+            vehiclePositionBuilder.setCurrentStopSequence(stopTime.getStopSequence());
+            vehiclePositionBuilder.setCurrentStatus(GtfsRealtime.VehiclePosition.VehicleStopStatus.INCOMING_AT);
+        }
+
+        GtfsRealtime.FeedEntity feedEntity = GtfsRealtime.FeedEntity.newBuilder()
+                .setId(vehicleDescriptor.getId())
+                .setVehicle(vehiclePositionBuilder.build())
+                .build();
+
+        GtfsRealtime.FeedHeader feedHeader = GtfsRealtime.FeedHeader.newBuilder()
+                .setGtfsRealtimeVersion("2.0")
+                .setIncrementality(GtfsRealtime.FeedHeader.Incrementality.DIFFERENTIAL)
+                .setTimestamp(new Date().getTime() / 1000L)
+                .build();
+
+        GtfsRealtime.FeedMessage feedMessage = GtfsRealtime.FeedMessage.newBuilder()
+                .setHeader(feedHeader)
+                .addEntity(feedEntity)
+                .build();
+
+        this.sendVehiclePosition(feedMessage);
+    }
+
+    public void deleteVehicleRealtimeData() {
+        GtfsRealtime.VehicleDescriptor vehicleDescriptor = this.createVehicleDescriptor();
+
+        GtfsRealtime.VehiclePosition.Builder vehiclePositionBuilder = GtfsRealtime.VehiclePosition.newBuilder();
+        vehiclePositionBuilder.setVehicle(vehicleDescriptor);
+
+        Date timestamp = new Date();
+        vehiclePositionBuilder.setTimestamp(timestamp.getTime() / 1000L);
+
+        GtfsRealtime.FeedEntity feedEntity = GtfsRealtime.FeedEntity.newBuilder()
+                .setId(vehicleDescriptor.getId())
+                .setVehicle(vehiclePositionBuilder.build())
+                .setIsDeleted(true)
+                .build();
+
+        GtfsRealtime.FeedHeader feedHeader = GtfsRealtime.FeedHeader.newBuilder()
+                .setGtfsRealtimeVersion("2.0")
+                .setIncrementality(GtfsRealtime.FeedHeader.Incrementality.DIFFERENTIAL)
+                .setTimestamp(new Date().getTime() / 1000L)
+                .build();
+
+        GtfsRealtime.FeedMessage feedMessage = GtfsRealtime.FeedMessage.newBuilder()
+                .setHeader(feedHeader)
+                .addEntity(feedEntity)
+                .build();
+
+        this.sendVehiclePosition(feedMessage);
+    }
+
     private void sendTripUpdate(GtfsRealtime.FeedMessage feedMessage, String routeId, String tripId) {
         SharedPreferences sharedPreferences = this.context.getSharedPreferences("de.hka.realtimer", Context.MODE_PRIVATE);
 
@@ -190,6 +265,15 @@ public class RealtimeRepository {
                     .retain(true)
                     .send();
         }
+    }
+
+    private GtfsRealtime.VehicleDescriptor createVehicleDescriptor() {
+        SharedPreferences sharedPreferences = this.context.getSharedPreferences("de.hka.realtimer", Context.MODE_PRIVATE);
+
+        GtfsRealtime.VehicleDescriptor.Builder vehicleDescriptorBuilder = GtfsRealtime.VehicleDescriptor.newBuilder();
+        vehicleDescriptorBuilder.setId(sharedPreferences.getString(Config.VEHICLE_ID, ""));
+
+        return vehicleDescriptorBuilder.build();
     }
 
     private GtfsRealtime.TripDescriptor createTripDescriptor(TripDetails tripDetails, long serviceDay) {

@@ -1,8 +1,10 @@
 package de.hka.realtimer.viewmodel;
 
 import android.app.Application;
+import android.location.Location;
 
 import java.util.Date;
+import java.util.Locale;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
@@ -20,6 +22,7 @@ public class TripViewModel extends AndroidViewModel {
 
     private long serviceDay;
 
+    private StopTime currentStopTime;
     private int differenceInMinutes;
     private int publishedDifferenceInMinutes;
 
@@ -37,9 +40,10 @@ public class TripViewModel extends AndroidViewModel {
     }
 
     public void updateTimetableDifference(StopTime stopTime) {
+        this.currentStopTime = stopTime;
         Date referenceTimestamp = new Date();
 
-        long differenceInSeconds = referenceTimestamp.getTime() - stopTime.getDepartureTime().getTime();
+        long differenceInSeconds = referenceTimestamp.getTime() - this.currentStopTime.getDepartureTime().getTime();
         this.differenceInMinutes = Math.round(differenceInSeconds / (60 * 1000));
         this.publishedDifferenceInMinutes = this.differenceInMinutes;
 
@@ -67,16 +71,33 @@ public class TripViewModel extends AndroidViewModel {
         TripDetails tripDetails = this.getTripDetails().getValue();
         if (tripDetails != null) {
             RealtimeRepository repository = RealtimeRepository.getInstance(this.getApplication().getApplicationContext());
-            repository.sendTripRealtimeData(tripDetails, stopTime, serviceDay, this.publishedDifferenceInMinutes);
+            repository.sendTripRealtimeData(tripDetails, this.currentStopTime, this.serviceDay, this.publishedDifferenceInMinutes);
+        }
+    }
+
+    public void updateVehiclePosition(Location location) {
+        // send vehicle position
+        TripDetails tripDetails = this.getTripDetails().getValue();
+        if (tripDetails != null) {
+            RealtimeRepository repository = RealtimeRepository.getInstance(this.getApplication().getApplicationContext());
+            repository.sendVehicleRealtimeData(location, tripDetails, this.currentStopTime, this.serviceDay);
+        } else {
+            RealtimeRepository repository = RealtimeRepository.getInstance(this.getApplication().getApplicationContext());
+            repository.sendVehicleRealtimeData(location, null, null, this.serviceDay);
         }
     }
 
     public void deleteRealtimeData() {
+        RealtimeRepository repository = RealtimeRepository.getInstance(this.getApplication().getApplicationContext());
+
         TripDetails tripDetails = this.getTripDetails().getValue();
         if (tripDetails != null) {
-            RealtimeRepository repository = RealtimeRepository.getInstance(this.getApplication().getApplicationContext());
             repository.deleteTripRealtimeData(tripDetails, this.serviceDay);
         }
+
+        repository.deleteVehicleRealtimeData();
+
+        OpenTripPlannerRepository.getInstance(this.getApplication().getApplicationContext()).clearCachedData();
     }
 
     public LiveData<TripDetails> getTripDetails() {

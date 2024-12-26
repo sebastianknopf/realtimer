@@ -167,6 +167,10 @@ public class OpenTripPlannerRepository {
         });
     }
 
+    public void clearCachedData() {
+        this.tripDetails.setValue(null);
+    }
+
     public LiveData<List<Station>> getStationsList() {
         return this.stationsList;
     }

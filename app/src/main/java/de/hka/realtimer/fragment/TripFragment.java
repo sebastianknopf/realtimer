@@ -170,8 +170,6 @@ public class TripFragment extends Fragment {
 
     @SuppressLint("MissingPermission")
     private void enableLocationUpdates() {
-        Log.d(this.getClass().getSimpleName(), "Location Updater started!");
-
         this.locationListener = location -> {
             TripDetails tripDetails = this.viewModel.getTripDetails().getValue();
             if (tripDetails != null) {
@@ -189,6 +187,8 @@ public class TripFragment extends Fragment {
                     }
                 }
             }
+
+            this.viewModel.updateVehiclePosition(location);
         };
 
         LocationManager locationManager = (LocationManager) this.getContext().getSystemService(Context.LOCATION_SERVICE);
