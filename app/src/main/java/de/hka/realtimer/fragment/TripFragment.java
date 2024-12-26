@@ -23,6 +23,7 @@ import de.hka.realtimer.adpater.StopTimeListAdapter;
 import de.hka.realtimer.data.RealtimeRepository;
 import de.hka.realtimer.databinding.FragmentTripBinding;
 import de.hka.realtimer.model.StopTime;
+import de.hka.realtimer.model.TripDetails;
 import de.hka.realtimer.viewmodel.TripViewModel;
 
 import android.util.Log;
@@ -125,11 +126,15 @@ public class TripFragment extends Fragment {
         });
 
         this.viewModel.getTripDetails().observe(this.getViewLifecycleOwner(), trip -> {
-            this.stopTimeListAdapter.setStopTimeList(trip.getStopTimes());
-            this.dataBinding.viewTripOverview.setVisibility(View.VISIBLE);
-            this.dataBinding.viewTripDetails.setVisibility(View.VISIBLE);
+            if (trip != null) {
+                this.stopTimeListAdapter.setStopTimeList(trip.getStopTimes());
+                this.dataBinding.viewTripOverview.setVisibility(View.VISIBLE);
+                this.dataBinding.viewTripDetails.setVisibility(View.VISIBLE);
 
-            this.stopTimeListAdapter.selectItem(0);
+                this.stopTimeListAdapter.selectItem(0);
+
+                this.checkLocationPermission();
+            }
         });
 
         this.viewModel.loadTripDetails(this.tripId, this.serviceDay);
@@ -138,8 +143,6 @@ public class TripFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-
-        this.checkLocationPermission();
     }
 
     @Override
@@ -170,14 +173,29 @@ public class TripFragment extends Fragment {
         Log.d(this.getClass().getSimpleName(), "Location Updater started!");
 
         this.locationListener = location -> {
-            Log.d(this.getClass().getSimpleName(), "Location " + location.toString());
+            TripDetails tripDetails = this.viewModel.getTripDetails().getValue();
+            if (tripDetails != null) {
+                for (int s = 0; s < tripDetails.getStopTimes().size(); s++) {
+                    StopTime stopTime = tripDetails.getStopTimes().get(s);
+
+                    Location stopLocation = new Location("GPS");
+                    stopLocation.setLatitude(stopTime.getStop().getLatitude());
+                    stopLocation.setLongitude(stopTime.getStop().getLongitude());
+
+                    double distance = stopLocation.distanceTo(location);
+                    if (distance < 50) {
+                        this.stopTimeListAdapter.selectItem(s);
+                        break;
+                    }
+                }
+            }
         };
 
         LocationManager locationManager = (LocationManager) this.getContext().getSystemService(Context.LOCATION_SERVICE);
         if (Build.VERSION.SDK_INT > 30) {
-            locationManager.requestLocationUpdates(LocationManager.FUSED_PROVIDER, 50, 1000, this.locationListener);
+            locationManager.requestLocationUpdates(LocationManager.FUSED_PROVIDER, 1000, 50, this.locationListener);
         } else {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 50, 1000, this.locationListener);
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 50, this.locationListener);
         }
     }
 
