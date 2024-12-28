@@ -75,9 +75,7 @@ public class TripViewModel extends AndroidViewModel {
         }
     }
 
-    public void updateVehiclePosition(Location location) {
-        // send vehicle position
-        TripDetails tripDetails = this.getTripDetails().getValue();
+    public void updateVehiclePosition(Location location, TripDetails tripDetails) {
         if (tripDetails != null) {
             RealtimeRepository repository = RealtimeRepository.getInstance(this.getApplication().getApplicationContext());
             repository.sendVehicleRealtimeData(location, tripDetails, this.currentStopTime, this.serviceDay);

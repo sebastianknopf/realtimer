@@ -3,6 +3,7 @@ package de.hka.realtimer.fragment;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -13,6 +14,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -35,7 +37,7 @@ import org.maplibre.android.location.permissions.PermissionsManager;
 
 import java.util.Date;
 
-public class TripFragment extends Fragment {
+public class TripFragment extends Fragment implements LocationListener {
 
     public final static String ARG_TRIP_ID = "ARG_TRIP_ID";
     public final static String ARG_SERVICE_DAY = "ARG_SERVICE_DAY";
@@ -47,11 +49,9 @@ public class TripFragment extends Fragment {
     private String tripId;
     private long serviceDay;
 
-    private StopTime currentStopTime;
     private final StopTimeListAdapter stopTimeListAdapter;
 
     private ActivityResultLauncher<String> locationPermissionLauncher;
-    private LocationListener locationListener;
 
     public static TripFragment newInstance() {
         return new TripFragment();
@@ -114,9 +114,7 @@ public class TripFragment extends Fragment {
         this.dataBinding.lstStopTimes.setAdapter(this.stopTimeListAdapter);
 
         this.stopTimeListAdapter.setOnItemSelectListener(item -> {
-            this.currentStopTime = item;
-
-            this.viewModel.updateTimetableDifference(this.currentStopTime);
+            this.viewModel.updateTimetableDifference(item);
         });
 
         this.dataBinding.btnLeaveTrip.setOnClickListener(btn -> {
@@ -132,8 +130,6 @@ public class TripFragment extends Fragment {
                 this.dataBinding.viewTripDetails.setVisibility(View.VISIBLE);
 
                 this.stopTimeListAdapter.selectItem(0);
-
-                this.checkLocationPermission();
             }
         });
 
@@ -143,6 +139,8 @@ public class TripFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+
+        this.enableLocationUpdates();
     }
 
     @Override
@@ -160,47 +158,43 @@ public class TripFragment extends Fragment {
         repository.disconnectBroker();
     }
 
-    private void checkLocationPermission() {
-        if (PermissionsManager.areLocationPermissionsGranted(this.getContext())) {
-            this.enableLocationUpdates();
+    private void enableLocationUpdates() {
+        if (ContextCompat.checkSelfPermission(this.requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            LocationManager locationManager = (LocationManager) this.getContext().getSystemService(Context.LOCATION_SERVICE);
+            if (Build.VERSION.SDK_INT > 30) {
+                locationManager.requestLocationUpdates(LocationManager.FUSED_PROVIDER, 1000, 50, this);
+            } else {
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 50, this);
+            }
         } else {
             this.locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
         }
     }
 
-    @SuppressLint("MissingPermission")
-    private void enableLocationUpdates() {
-        this.locationListener = location -> {
-            TripDetails tripDetails = this.viewModel.getTripDetails().getValue();
-            if (tripDetails != null) {
-                for (int s = 0; s < tripDetails.getStopTimes().size(); s++) {
-                    StopTime stopTime = tripDetails.getStopTimes().get(s);
-
-                    Location stopLocation = new Location("GPS");
-                    stopLocation.setLatitude(stopTime.getStop().getLatitude());
-                    stopLocation.setLongitude(stopTime.getStop().getLongitude());
-
-                    double distance = stopLocation.distanceTo(location);
-                    if (distance < 50) {
-                        this.stopTimeListAdapter.selectItem(s);
-                        break;
-                    }
-                }
-            }
-
-            this.viewModel.updateVehiclePosition(location);
-        };
-
-        LocationManager locationManager = (LocationManager) this.getContext().getSystemService(Context.LOCATION_SERVICE);
-        if (Build.VERSION.SDK_INT > 30) {
-            locationManager.requestLocationUpdates(LocationManager.FUSED_PROVIDER, 1000, 50, this.locationListener);
-        } else {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 50, this.locationListener);
-        }
-    }
-
     private void disableLocationUpdates() {
         LocationManager locationManager = (LocationManager) this.getContext().getSystemService(Context.LOCATION_SERVICE);
-        locationManager.removeUpdates(this.locationListener);
+        locationManager.removeUpdates(this);
+    }
+
+    @Override
+    public void onLocationChanged(@NonNull Location location) {
+        TripDetails tripDetails = this.viewModel.getTripDetails().getValue();
+        if (tripDetails != null) {
+            for (int s = 0; s < tripDetails.getStopTimes().size(); s++) {
+                StopTime stopTime = tripDetails.getStopTimes().get(s);
+
+                Location stopLocation = new Location("GPS");
+                stopLocation.setLatitude(stopTime.getStop().getLatitude());
+                stopLocation.setLongitude(stopTime.getStop().getLongitude());
+
+                double distance = stopLocation.distanceTo(location);
+                if (distance < 50) {
+                    this.stopTimeListAdapter.selectItem(s);
+                    break;
+                }
+            }
+        }
+
+        this.viewModel.updateVehiclePosition(location, tripDetails);
     }
 }
