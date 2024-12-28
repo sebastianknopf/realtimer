@@ -97,8 +97,8 @@ public class RealtimeRepository {
                 .send();
     }
 
-    public void sendTripRealtimeData(TripDetails tripDetails, StopTime stopTime, long serviceDay, int departureDelayInMinutes) {
-        GtfsRealtime.TripDescriptor tripDescriptor = this.createTripDescriptor(tripDetails, serviceDay);
+    public void sendTripRealtimeData(TripDetails tripDetails, StopTime stopTime, Date operationDay, int departureDelayInMinutes) {
+        GtfsRealtime.TripDescriptor tripDescriptor = this.createTripDescriptor(tripDetails, operationDay);
 
         GtfsRealtime.TripUpdate.StopTimeEvent stopTimeEvent = GtfsRealtime.TripUpdate.StopTimeEvent.newBuilder()
                 .setDelay(departureDelayInMinutes * 60)
@@ -134,8 +134,8 @@ public class RealtimeRepository {
         this.sendTripUpdate(feedMessage, tripDetails.getRouteId(), tripDetails.getTripId());
     }
 
-    public void deleteTripRealtimeData(TripDetails tripDetails, long serviceDay) {
-        GtfsRealtime.TripDescriptor tripDescriptor = this.createTripDescriptor(tripDetails, serviceDay);
+    public void deleteTripRealtimeData(TripDetails tripDetails, Date operationDay) {
+        GtfsRealtime.TripDescriptor tripDescriptor = this.createTripDescriptor(tripDetails, operationDay);
 
         GtfsRealtime.TripUpdate tripUpdate = GtfsRealtime.TripUpdate.newBuilder()
                 .setTrip(tripDescriptor)
@@ -161,7 +161,7 @@ public class RealtimeRepository {
         this.sendTripUpdate(feedMessage, tripDetails.getRouteId(), tripDetails.getTripId());
     }
 
-    public void sendVehicleRealtimeData(Location location, TripDetails tripDetails, StopTime stopTime, long serviceDay) {
+    public void sendVehicleRealtimeData(Location location, TripDetails tripDetails, StopTime stopTime, Date operationDay) {
         GtfsRealtime.VehicleDescriptor vehicleDescriptor = this.createVehicleDescriptor();
 
         GtfsRealtime.Position position = GtfsRealtime.Position.newBuilder()
@@ -177,7 +177,7 @@ public class RealtimeRepository {
         vehiclePositionBuilder.setTimestamp(timestamp.getTime() / 1000L);
 
         if (tripDetails != null) {
-            GtfsRealtime.TripDescriptor tripDescriptor = this.createTripDescriptor(tripDetails, serviceDay);
+            GtfsRealtime.TripDescriptor tripDescriptor = this.createTripDescriptor(tripDetails, operationDay);
             vehiclePositionBuilder.setTrip(tripDescriptor);
         }
 
@@ -276,19 +276,13 @@ public class RealtimeRepository {
         return vehicleDescriptorBuilder.build();
     }
 
-    private GtfsRealtime.TripDescriptor createTripDescriptor(TripDetails tripDetails, long serviceDay) {
+    private GtfsRealtime.TripDescriptor createTripDescriptor(TripDetails tripDetails, Date operationDay) {
         GtfsRealtime.TripDescriptor.Builder tripDescriptorBuilder = GtfsRealtime.TripDescriptor.newBuilder();
         tripDescriptorBuilder.setTripId(this.stripFeedId(tripDetails.getTripId()));
         tripDescriptorBuilder.setRouteId(this.stripFeedId(tripDetails.getRouteId()));
 
-        if (serviceDay != 0) {
-            Date serviceDate = new Date();
-            serviceDate.setTime(serviceDay * 1000L);
-
-            SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-            tripDescriptorBuilder.setStartDate(sdf.format(serviceDate));
-        }
-
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+        tripDescriptorBuilder.setStartDate(sdf.format(operationDay));
         tripDescriptorBuilder.setScheduleRelationship(GtfsRealtime.TripDescriptor.ScheduleRelationship.SCHEDULED);
 
         return tripDescriptorBuilder.build();

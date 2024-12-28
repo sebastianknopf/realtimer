@@ -5,7 +5,7 @@ import java.util.Date;
 
 public class Departure {
 
-    private long serviceDay;
+    private Date operationDay;
     private String routeId;
     private String routeName;
     private String mode;
@@ -21,12 +21,12 @@ public class Departure {
 
     }
 
-    public long getServiceDay() {
-        return this.serviceDay;
+    public Date getOperationDay() {
+        return this.operationDay;
     }
 
-    public void setServiceDay(long serviceDay) {
-        this.serviceDay = serviceDay;
+    public void setOperationDay(Date serviceDay) {
+        this.operationDay = serviceDay;
     }
 
     public String getRouteId() {

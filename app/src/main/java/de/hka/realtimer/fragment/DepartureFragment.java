@@ -85,7 +85,7 @@ public class DepartureFragment extends Fragment {
         this.departureListAdapter.setOnItemClickListener(item -> {
             Bundle bundle = new Bundle();
             bundle.putString(TripFragment.ARG_TRIP_ID, item.getTripId());
-            bundle.putLong(TripFragment.ARG_SERVICE_DAY, item.getServiceDay());
+            bundle.putSerializable(TripFragment.ARG_SERVICE_DAY, item.getOperationDay());
 
             this.navigationController.navigate(R.id.action_departureFragment_to_tripFragment, bundle);
         });

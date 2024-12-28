@@ -47,7 +47,7 @@ public class TripFragment extends Fragment implements LocationListener {
     private NavController navigationController;
 
     private String tripId;
-    private long serviceDay;
+    private Date operationDay;
 
     private final StopTimeListAdapter stopTimeListAdapter;
 
@@ -68,7 +68,7 @@ public class TripFragment extends Fragment implements LocationListener {
         Bundle args = this.getArguments();
         if (args != null) {
             this.tripId = args.getString(ARG_TRIP_ID, null);
-            this.serviceDay = args.getLong(ARG_SERVICE_DAY, (new Date().getTime() / 1000L));
+            this.operationDay = (Date) args.getSerializable(ARG_SERVICE_DAY);
         }
 
         RealtimeRepository repository = RealtimeRepository.getInstance(this.getContext());
@@ -133,7 +133,7 @@ public class TripFragment extends Fragment implements LocationListener {
             }
         });
 
-        this.viewModel.loadTripDetails(this.tripId, this.serviceDay);
+        this.viewModel.loadTripDetails(this.tripId, this.operationDay);
     }
 
     @Override

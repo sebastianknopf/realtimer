@@ -94,8 +94,11 @@ public class OpenTripPlannerRepository {
             if (response.data != null && response.data.station != null && response.data.station.stops != null) {
                 for (DeparturesListQuery.Stop obj : response.data.station.stops) {
                     for (DeparturesListQuery.StoptimesWithoutPattern stopTime : obj.stoptimesWithoutPatterns) {
+                        Date operationDay = new Date();
+                        operationDay.setTime((int)stopTime.serviceDay * 1000L);
+
                         Departure departure = new Departure();
-                        departure.setServiceDay((int) stopTime.serviceDay);
+                        departure.setOperationDay(operationDay);
                         departure.setRouteId(stopTime.trip.route.gtfsId);
                         departure.setRouteName(stopTime.trip.route.shortName);
                         departure.setMode(stopTime.trip.route.mode.toString());
@@ -124,7 +127,7 @@ public class OpenTripPlannerRepository {
         });
     }
 
-    public void loadTripDetails(String tripId, long serviceDay) {
+    public void loadTripDetails(String tripId, Date operationDay) {
         this.apolloClient.query(new TripDetailsQuery(tripId)).enqueue(response -> {
             if (response.data != null && response.data.trip != null) {
                 TripDetails tripDetails = new TripDetails();
@@ -146,12 +149,12 @@ public class OpenTripPlannerRepository {
                     stopTime.setStopSequence(obj.stopPosition);
 
                     Date arrivalTime = new Date();
-                    arrivalTime.setTime((serviceDay + obj.scheduledArrival) * 1000L);
+                    arrivalTime.setTime(((operationDay.getTime() / 1000) + obj.scheduledArrival) * 1000L);
 
                     stopTime.setArrivalTime(arrivalTime);
 
                     Date departureTime = new Date();
-                    departureTime.setTime((serviceDay + obj.scheduledDeparture) * 1000L);
+                    departureTime.setTime(((operationDay.getTime() / 1000) + obj.scheduledDeparture) * 1000L);
 
                     stopTime.setDepartureTime(departureTime);
 

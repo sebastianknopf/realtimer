@@ -20,7 +20,7 @@ public class TripViewModel extends AndroidViewModel {
 
     private MutableLiveData<String> currentDelayText;
 
-    private long serviceDay;
+    private Date operationDay;
 
     private StopTime currentStopTime;
     private int differenceInMinutes;
@@ -32,11 +32,11 @@ public class TripViewModel extends AndroidViewModel {
         this.currentDelayText = new MutableLiveData<>("#");
     }
 
-    public void loadTripDetails(String tripId, long serviceDay) {
-        this.serviceDay = serviceDay;
+    public void loadTripDetails(String tripId, Date operationDay) {
+        this.operationDay = operationDay;
 
         OpenTripPlannerRepository repository = OpenTripPlannerRepository.getInstance(this.getApplication().getApplicationContext());
-        repository.loadTripDetails(tripId, this.serviceDay);
+        repository.loadTripDetails(tripId, this.operationDay);
     }
 
     public void updateTimetableDifference(StopTime stopTime) {
@@ -71,17 +71,17 @@ public class TripViewModel extends AndroidViewModel {
         TripDetails tripDetails = this.getTripDetails().getValue();
         if (tripDetails != null) {
             RealtimeRepository repository = RealtimeRepository.getInstance(this.getApplication().getApplicationContext());
-            repository.sendTripRealtimeData(tripDetails, this.currentStopTime, this.serviceDay, this.publishedDifferenceInMinutes);
+            repository.sendTripRealtimeData(tripDetails, this.currentStopTime, this.operationDay, this.publishedDifferenceInMinutes);
         }
     }
 
     public void updateVehiclePosition(Location location, TripDetails tripDetails) {
         if (tripDetails != null) {
             RealtimeRepository repository = RealtimeRepository.getInstance(this.getApplication().getApplicationContext());
-            repository.sendVehicleRealtimeData(location, tripDetails, this.currentStopTime, this.serviceDay);
+            repository.sendVehicleRealtimeData(location, tripDetails, this.currentStopTime, this.operationDay);
         } else {
             RealtimeRepository repository = RealtimeRepository.getInstance(this.getApplication().getApplicationContext());
-            repository.sendVehicleRealtimeData(location, null, null, this.serviceDay);
+            repository.sendVehicleRealtimeData(location, null, null, this.operationDay);
         }
     }
 
@@ -90,7 +90,7 @@ public class TripViewModel extends AndroidViewModel {
 
         TripDetails tripDetails = this.getTripDetails().getValue();
         if (tripDetails != null) {
-            repository.deleteTripRealtimeData(tripDetails, this.serviceDay);
+            repository.deleteTripRealtimeData(tripDetails, this.operationDay);
         }
 
         repository.deleteVehicleRealtimeData();
