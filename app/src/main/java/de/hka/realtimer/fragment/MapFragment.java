@@ -2,11 +2,12 @@ package de.hka.realtimer.fragment;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 
@@ -40,8 +41,6 @@ import org.maplibre.android.location.engine.LocationEngineCallback;
 import org.maplibre.android.location.engine.LocationEngineRequest;
 import org.maplibre.android.location.engine.LocationEngineResult;
 import org.maplibre.android.location.modes.CameraMode;
-import org.maplibre.android.location.permissions.PermissionsListener;
-import org.maplibre.android.location.permissions.PermissionsManager;
 import org.maplibre.android.maps.MapLibreMap;
 import org.maplibre.android.maps.Style;
 import org.maplibre.android.plugins.annotation.Symbol;
@@ -50,9 +49,8 @@ import org.maplibre.android.plugins.annotation.SymbolOptions;
 import org.maplibre.android.style.layers.Property;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class MapFragment extends Fragment {
 
@@ -60,11 +58,6 @@ public class MapFragment extends Fragment {
     private MapViewModel viewModel;
 
     private NavController navigationController;
-
-    private MapLibreMap map;
-    private Style mapStyle;
-    private SymbolManager mapSymbolManager;
-
     private ActivityResultLauncher<String> locationPermissionLauncher;
     private LocationEngineCallback<LocationEngineResult> locationEngineCallback;
 
@@ -83,7 +76,7 @@ public class MapFragment extends Fragment {
 
         this.locationPermissionLauncher = this.registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
             if (isGranted) {
-                this.enableLocationComponent();
+                this.startMapAsync();
             } else {
                 Log.d(this.getClass().getSimpleName(), "Location permission refused!");
             }
@@ -110,51 +103,7 @@ public class MapFragment extends Fragment {
         this.dataBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_map, container, false);
         this.dataBinding.setLifecycleOwner(this.getViewLifecycleOwner());
 
-        // configure map view
         this.dataBinding.mapView.onCreate(savedInstanceState);
-
-        this.dataBinding.mapView.getMapAsync(map -> {
-            this.map = map;
-
-            this.map.getUiSettings().setLogoEnabled(false);
-            this.map.getUiSettings().setAttributionEnabled(false);
-
-            this.map.setStyle("https://sgx.geodatenzentrum.de/gdz_basemapde_vektor/styles/bm_web_col.json", style -> {
-                this.mapStyle = style;
-
-                this.mapStyle.addImage("ic_location", this.getContext().getDrawable(R.drawable.ic_location));
-
-                this.mapSymbolManager = new SymbolManager(this.dataBinding.mapView, this.map, this.mapStyle);
-                this.mapSymbolManager.addClickListener(this::onAnnotationClick);
-
-                this.viewModel.getStationList().observe(this.getViewLifecycleOwner(), stations -> {
-                    List<SymbolOptions> stationSymbolList = new ArrayList<>();
-
-                    for (Station station : stations) {
-                        JsonObject stationJsonObject = new JsonObject();
-                        stationJsonObject.addProperty("station_id", station.getId());
-                        stationJsonObject.addProperty("station_name", station.getName());
-
-                        SymbolOptions symbolOptions = new SymbolOptions()
-                                .withLatLng(new LatLng(station.getLatitude(), station.getLongitude()))
-                                .withData(stationJsonObject)
-                                .withIconImage("ic_location")
-                                .withIconAnchor(Property.ICON_ANCHOR_BOTTOM)
-                                .withIconSize(2.0f);
-
-                        stationSymbolList.add(symbolOptions);
-                    }
-
-                    this.mapSymbolManager.create(stationSymbolList);
-                });
-
-                this.checkLocationPermission();
-            });
-
-            if (savedInstanceState == null) {
-                this.map.setCameraPosition(new CameraPosition.Builder().target(new LatLng(48.8922, 8.6946)).zoom(14.0).build());
-            }
-        });
 
         return this.dataBinding.getRoot();
     }
@@ -188,6 +137,8 @@ public class MapFragment extends Fragment {
         super.onResume();
 
         this.dataBinding.mapView.onResume();
+
+        this.startMapAsync();
     }
 
     @Override
@@ -197,7 +148,6 @@ public class MapFragment extends Fragment {
         this.dataBinding.mapView.onSaveInstanceState(outState);
     }
 
-    @SuppressLint("MissingPermission")
     @Override
     public void onPause() {
         super.onPause();
@@ -236,55 +186,115 @@ public class MapFragment extends Fragment {
         return false;
     }
 
-    private void checkLocationPermission() {
-        if (PermissionsManager.areLocationPermissionsGranted(this.getContext())) {
-            this.enableLocationComponent();
+    private void startMapAsync() {
+        CompletableFuture<MapLibreMap> mapFuture = this.initMapFuture();
+        mapFuture.thenAccept(map -> {
+            CompletableFuture<Style> mapStyleFuture = this.initMapStyleFuture(map, "https://sgx.geodatenzentrum.de/gdz_basemapde_vektor/styles/bm_web_col.json");
+
+            mapStyleFuture.thenAccept(style -> {
+                this.enableLocationComponent(map, style);
+            });
+        });
+    }
+
+    private CompletableFuture<MapLibreMap> initMapFuture() {
+        CompletableFuture<MapLibreMap> future = new CompletableFuture<>();
+
+        this.dataBinding.mapView.getMapAsync(map -> {
+            map.getUiSettings().setLogoEnabled(false);
+            map.getUiSettings().setAttributionEnabled(false);
+
+            map.setCameraPosition(new CameraPosition.Builder().target(new LatLng(48.8908,8.7029)).zoom(14.0).build());
+
+            future.complete(map);
+        });
+
+        return future;
+    }
+
+    private CompletableFuture<Style> initMapStyleFuture(MapLibreMap map, String styleUrl) {
+        CompletableFuture<Style> future = new CompletableFuture<>();
+
+        map.setStyle(styleUrl, style -> {
+            style.addImage("ic_location", this.requireContext().getDrawable(R.drawable.ic_location));
+
+            SymbolManager mapSymbolManager = new SymbolManager(this.dataBinding.mapView, map, style);
+            mapSymbolManager.addClickListener(this::onAnnotationClick);
+
+            this.viewModel.getStationList().observe(this.getViewLifecycleOwner(), stations -> {
+                List<SymbolOptions> stationSymbolList = new ArrayList<>();
+
+                for (Station station : stations) {
+                    JsonObject stationJsonObject = new JsonObject();
+                    stationJsonObject.addProperty("station_id", station.getId());
+                    stationJsonObject.addProperty("station_name", station.getName());
+
+                    SymbolOptions symbolOptions = new SymbolOptions()
+                            .withLatLng(new LatLng(station.getLatitude(), station.getLongitude()))
+                            .withData(stationJsonObject)
+                            .withIconImage("ic_location")
+                            .withIconAnchor(Property.ICON_ANCHOR_BOTTOM)
+                            .withIconSize(2.0f);
+
+                    stationSymbolList.add(symbolOptions);
+                }
+
+                mapSymbolManager.create(stationSymbolList);
+            });
+
+            future.complete(style);
+        });
+
+        return future;
+    }
+
+    private void enableLocationComponent(MapLibreMap map, Style style) {
+        if (ContextCompat.checkSelfPermission(this.requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            LocationComponentOptions locationComponentOptions = LocationComponentOptions.builder(this.getContext())
+                    .pulseEnabled(true)
+                    .build();
+
+            LocationEngineRequest locationEngineRequest = new LocationEngineRequest.Builder(1000)
+                    .setFastestInterval(1000)
+                    .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
+                    .build();
+
+            LocationComponentActivationOptions locationComponentActivationOptions = LocationComponentActivationOptions.builder(this.getContext(), style)
+                    .locationComponentOptions(locationComponentOptions)
+                    .useDefaultLocationEngine(true)
+                    .locationEngineRequest(locationEngineRequest)
+                    .build();
+
+            this.locationEngineCallback = new LocationEngineCallback<>() {
+                @Override
+                public void onSuccess(LocationEngineResult locationEngineResult) {
+                    findClosestStations(locationEngineResult.getLastLocation());
+                }
+
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.d(this.getClass().getSimpleName(), "Location update failed!");
+                }
+            };
+
+            LocationComponent locationComponent = map.getLocationComponent();
+            locationComponent.activateLocationComponent(locationComponentActivationOptions);
+            locationComponent.setLocationComponentEnabled(true);
+            locationComponent.setCameraMode(CameraMode.TRACKING);
+            locationComponent.getLocationEngine().requestLocationUpdates(locationEngineRequest, this.locationEngineCallback, null);
         } else {
             this.locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
         }
     }
 
-    @SuppressLint("MissingPermission")
-    private void enableLocationComponent() {
-        LocationComponentOptions locationComponentOptions = LocationComponentOptions.builder(this.getContext())
-                .pulseEnabled(true)
-                .build();
-
-        LocationEngineRequest locationEngineRequest = new LocationEngineRequest.Builder(5000)
-                .setFastestInterval(5000)
-                .setPriority(LocationEngineRequest.PRIORITY_HIGH_ACCURACY)
-                .build();
-
-        LocationComponentActivationOptions locationComponentActivationOptions = LocationComponentActivationOptions.builder(this.getContext(), this.mapStyle)
-                .locationComponentOptions(locationComponentOptions)
-                .useDefaultLocationEngine(true)
-                .locationEngineRequest(locationEngineRequest)
-                .build();
-
-        this.locationEngineCallback = new LocationEngineCallback<>() {
-            @Override
-            public void onSuccess(LocationEngineResult locationEngineResult) {
-                findClosestStations(locationEngineResult.getLastLocation());
-            }
-
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.d(this.getClass().getSimpleName(), "Location update failed!");
-            }
-        };
-
-        LocationComponent locationComponent = this.map.getLocationComponent();
-        locationComponent.activateLocationComponent(locationComponentActivationOptions);
-        locationComponent.setLocationComponentEnabled(true);
-        locationComponent.setCameraMode(CameraMode.TRACKING);
-        locationComponent.getLocationEngine().requestLocationUpdates(locationEngineRequest, this.locationEngineCallback, null);
-    }
-
-    @SuppressLint("MissingPermission")
     private void disableLocationComponent() {
-        LocationComponent locationComponent = this.map.getLocationComponent();
-        locationComponent.setLocationComponentEnabled(false);
-        locationComponent.getLocationEngine().removeLocationUpdates(this.locationEngineCallback);
+        if (ContextCompat.checkSelfPermission(this.requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            this.dataBinding.mapView.getMapAsync(map -> {
+                LocationComponent locationComponent = map.getLocationComponent();
+                locationComponent.setLocationComponentEnabled(false);
+                locationComponent.getLocationEngine().removeLocationUpdates(this.locationEngineCallback);
+            });
+        }
     }
 
     private void findClosestStations(Location location) {
