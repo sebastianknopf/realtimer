@@ -16,8 +16,10 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import de.hka.realtimer.MainActivity;
+import de.hka.realtimer.adpater.ClosestStationListAdapter;
 import de.hka.realtimer.databinding.FragmentMapBinding;
 import de.hka.realtimer.model.Station;
+import de.hka.realtimer.model.StationWithDistance;
 import de.hka.realtimer.viewmodel.MapViewModel;
 import de.hka.realtimer.R;
 
@@ -28,7 +30,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.gson.JsonObject;
 
 import org.maplibre.android.MapLibre;
@@ -57,6 +61,10 @@ public class MapFragment extends Fragment {
     private FragmentMapBinding dataBinding;
     private MapViewModel viewModel;
 
+    private ClosestStationListAdapter closestStationListAdapter;
+
+    private BottomSheetBehavior<LinearLayout> bottomSheetBehavior;
+
     private NavController navigationController;
     private ActivityResultLauncher<String> locationPermissionLauncher;
     private LocationEngineCallback<LocationEngineResult> locationEngineCallback;
@@ -66,6 +74,7 @@ public class MapFragment extends Fragment {
     }
 
     public MapFragment() {
+        this.closestStationListAdapter = new ClosestStationListAdapter();
     }
 
     @Override
@@ -104,6 +113,17 @@ public class MapFragment extends Fragment {
         this.dataBinding.setLifecycleOwner(this.getViewLifecycleOwner());
 
         this.dataBinding.mapView.onCreate(savedInstanceState);
+
+        this.dataBinding.lstClostestStations.setAdapter(this.closestStationListAdapter);
+
+        if (this.dataBinding.layoutBottomSheet != null) {
+            this.bottomSheetBehavior = BottomSheetBehavior.from(this.dataBinding.layoutBottomSheet);
+            this.bottomSheetBehavior.setState(BottomSheetBehavior.STATE_HIDDEN);
+        }
+
+        this.closestStationListAdapter.setOnItemClickListener(station -> {
+            this.openDepartureFragment(station.getId(), station.getName());
+        });
 
         return this.dataBinding.getRoot();
     }
@@ -173,17 +193,22 @@ public class MapFragment extends Fragment {
 
     private boolean onAnnotationClick(Symbol symbol) {
         if (symbol.getData() != null) {
-            Bundle args = new Bundle();
-            JsonObject stationJsonObject = symbol.getData().getAsJsonObject();
-            args.putString(DepartureFragment.ARG_STATION_ID, stationJsonObject.get("station_id").getAsString());
-            args.putString(DepartureFragment.ARG_STATION_NAME, stationJsonObject.get("station_name").getAsString());
 
-            this.navigationController.navigate(R.id.action_mapFragment_to_departureFragment, args);
+            JsonObject stationJsonObject = symbol.getData().getAsJsonObject();
+            this.openDepartureFragment(stationJsonObject.get("station_id").getAsString(), stationJsonObject.get("station_name").getAsString());
 
             return true;
         }
 
         return false;
+    }
+
+    private void openDepartureFragment(String stationId, String stationName) {
+        Bundle args = new Bundle();
+        args.putString(DepartureFragment.ARG_STATION_ID, stationId);
+        args.putString(DepartureFragment.ARG_STATION_NAME, stationName);
+
+        this.navigationController.navigate(R.id.action_mapFragment_to_departureFragment, args);
     }
 
     private void startMapAsync() {
@@ -282,6 +307,10 @@ public class MapFragment extends Fragment {
             locationComponent.setLocationComponentEnabled(true);
             locationComponent.setCameraMode(CameraMode.TRACKING);
             locationComponent.getLocationEngine().requestLocationUpdates(locationEngineRequest, this.locationEngineCallback, null);
+
+            if (this.bottomSheetBehavior != null) {
+                this.bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
+            }
         } else {
             this.locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
         }
@@ -315,10 +344,20 @@ public class MapFragment extends Fragment {
                 return Double.compare(d1, d2);
             });
 
-            Log.d(this.getClass().getSimpleName(), "10 top closest locations are ...");
+            List<StationWithDistance> closestStationList = new ArrayList<>();
             for (int i = 0; i < Math.min(10, stationList.size()); i++) {
-                Log.d(this.getClass().getSimpleName(), stationList.get(i).getName());
+                StationWithDistance station = new StationWithDistance(stationList.get(i));
+
+                Location stationLocation = new Location("GPS");
+                stationLocation.setLatitude(station.getLatitude());
+                stationLocation.setLongitude(station.getLongitude());
+
+                station.setDistance(stationLocation.distanceTo(location));
+
+                closestStationList.add(station);
             }
+
+            this.closestStationListAdapter.setClosestStationList(closestStationList);
         }
     }
 }

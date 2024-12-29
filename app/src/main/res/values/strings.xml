@@ -11,6 +11,7 @@
 
     <!-- Map Fragment -->
     <string name="map_title">Realtimer</string>
+    <string name="map_closest_stations">Haltestellen in der Nähe</string>
 
     <!-- TripFragment -->
     <string name="trip_title">Aktuelle Fahrt</string>
